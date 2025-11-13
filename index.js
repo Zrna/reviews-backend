@@ -11,7 +11,7 @@ const userRoutes = require('./routes/User');
 const reviewRoutes = require('./routes/Review');
 const recommendationRoutes = require('./routes/Recommendation');
 
-const PORT = 5001;
+const PORT = process.env.PORT || 5001;
 const app = express();
 
 db.sequelize
