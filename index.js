@@ -1,6 +1,9 @@
+require('dotenv').config();
+
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const express = require('express');
+const morgan = require('morgan');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUI = require('swagger-ui-express');
 
@@ -21,6 +24,19 @@ db.sequelize
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
+
+// Add request logging - logs when request starts and completes
+if (process.env.NODE_ENV === 'production') {
+  app.use(morgan('combined'));
+} else {
+  // Log when request arrives (immediate)
+  app.use((req, res, next) => {
+    console.log(`→ ${req.method} ${req.url}`);
+    next();
+  });
+  // Log when request completes (with timing)
+  app.use(morgan('dev'));
+}
 
 app.use(cookieParser());
 app.use(
