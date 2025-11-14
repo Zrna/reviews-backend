@@ -61,7 +61,10 @@ const auth_register = async (req, res) => {
 
       res.cookie('access-token', accessToken, {
         maxAge: 60 * 60 * 24 * 30 * 1000, // expires after 30 days
+        // TODO: implement secure cookie settings
         // httpOnly: true, // if active, can't read cookie from the frontend
+        secure: process.env.NODE_ENV === 'production', // only send over HTTPS in production
+        sameSite: 'lax', // CSRF protection while allowing cross-site GET requests
       });
 
       return res.status(201).json({
@@ -104,6 +107,8 @@ const auth_login = async (req, res) => {
       res.cookie('access-token', accessToken, {
         maxAge: 60 * 60 * 24 * 30 * 1000, // expires after 30 days
         // httpOnly: true, // if active, can't read cookie from the frontend
+        secure: process.env.NODE_ENV === 'production', // only send over HTTPS in production
+        sameSite: 'lax', // CSRF protection while allowing cross-site GET requests
       });
 
       return res.status(200).json({ accessToken });
