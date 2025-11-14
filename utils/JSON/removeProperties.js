@@ -6,10 +6,10 @@ const fs = require('fs');
 // node clearJSON.js ../data/csvjson.json "Watchtime in Million"
 function removeKeysFromFile(jsonFilePath, keysToRemove) {
   // Read the JSON file
-  let jsonData = fs.readFileSync(jsonFilePath);
+  const jsonData = fs.readFileSync(jsonFilePath);
 
   try {
-    let jsonArray = JSON.parse(jsonData);
+    const jsonArray = JSON.parse(jsonData);
 
     // If keysToRemove is not an array, convert it to an array with one element
     if (!Array.isArray(keysToRemove)) {

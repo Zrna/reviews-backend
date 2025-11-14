@@ -21,7 +21,7 @@ module.exports = {
     });
   },
 
-  down: async (queryInterface, Sequelize) => {
+  down: async queryInterface => {
     await queryInterface.removeConstraint('reviews', 'fk_reviews_images_id');
     await queryInterface.removeColumn('reviews', 'imageId');
   },

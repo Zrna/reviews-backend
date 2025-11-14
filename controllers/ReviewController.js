@@ -218,7 +218,7 @@ const get_review_by_id = (req, res) => {
     .then(async review => {
       if (!review) {
         return res.status(404).json({
-          error: `Review not found`,
+          error: 'Review not found',
         });
       }
 
@@ -281,7 +281,7 @@ const update_review_by_id = async (req, res) => {
         .then(async review => {
           if (!review) {
             return res.status(404).json({
-              error: `Review not found`,
+              error: 'Review not found',
             });
           }
 
