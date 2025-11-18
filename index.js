@@ -14,6 +14,7 @@ const swaggerUI = require('swagger-ui-express');
 
 const swaggerOptions = require('./config/swaggerOptions');
 const db = require('./models');
+const { errorHandler } = require('./middlewares/errorHandler');
 const authRoutes = require('./routes/Auth');
 const userRoutes = require('./routes/User');
 const reviewRoutes = require('./routes/Review');
@@ -63,6 +64,9 @@ app.use('*', (_, res) => {
     error: 'Route Not Found',
   });
 });
+
+// Global error handler - must be last
+app.use(errorHandler);
 
 app.listen(PORT, error => {
   if (error) return console.log(`Cannot listen on PORT: ${PORT}`);

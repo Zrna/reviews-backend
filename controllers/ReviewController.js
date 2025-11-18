@@ -4,66 +4,62 @@ const { getPlatformOrMediaUrl } = require('../utils/platforms');
 
 const ImageController = require('./ImageController');
 
-const get_all_reviews = (req, res) => {
-  const userId = getUserIdFromRequest(req);
+const get_all_reviews = async (req, res, next) => {
+  try {
+    const userId = getUserIdFromRequest(req);
 
-  Review.findAll({
-    where: {
-      userId,
-    },
-    order: [['updatedAt', 'DESC']],
-    include: [
-      {
-        model: Image,
-        as: 'image',
-        attributes: ['img'], // Only select the 'img' attribute
+    const reviews = await Review.findAll({
+      where: {
+        userId,
       },
-    ],
-  })
-    .then(async reviews => {
-      return res.status(200).json({
-        data: reviews,
-        totalRecords: reviews.length,
-      });
-    })
-    .catch(err => {
-      return res.status(err.status || 500).json({
-        error: err.message || 'Server Error',
-      });
+      order: [['updatedAt', 'DESC']],
+      include: [
+        {
+          model: Image,
+          as: 'image',
+          attributes: ['img'], // Only select the 'img' attribute
+        },
+      ],
     });
+
+    return res.status(200).json({
+      data: reviews,
+      totalRecords: reviews.length,
+    });
+  } catch (err) {
+    next(err);
+  }
 };
 
-const get_latest_reviews = (req, res) => {
-  const userId = getUserIdFromRequest(req);
+const get_latest_reviews = async (req, res, next) => {
+  try {
+    const userId = getUserIdFromRequest(req);
 
-  Review.findAll({
-    where: {
-      userId,
-    },
-    order: [['createdAt', 'DESC']],
-    limit: 5,
-    include: [
-      {
-        model: Image,
-        as: 'image',
-        attributes: ['img'],
+    const reviews = await Review.findAll({
+      where: {
+        userId,
       },
-    ],
-  })
-    .then(async reviews => {
-      return res.status(200).json({
-        data: reviews,
-        totalRecords: reviews.length,
-      });
-    })
-    .catch(err => {
-      return res.status(err.status || 500).json({
-        error: err.message || 'Server Error',
-      });
+      order: [['createdAt', 'DESC']],
+      limit: 5,
+      include: [
+        {
+          model: Image,
+          as: 'image',
+          attributes: ['img'],
+        },
+      ],
     });
+
+    return res.status(200).json({
+      data: reviews,
+      totalRecords: reviews.length,
+    });
+  } catch (err) {
+    next(err);
+  }
 };
 
-const get_reviews_grouped_by_ratings = async (req, res) => {
+const get_reviews_grouped_by_ratings = async (req, res, next) => {
   const userId = getUserIdFromRequest(req);
   const count = req.query.count ? parseInt(req.query.count) : 10;
   const rating = req.params.rating ? parseInt(req.params.rating) : null;
@@ -126,204 +122,188 @@ const get_reviews_grouped_by_ratings = async (req, res) => {
 
     return res.status(200).json(groupedReviews);
   } catch (err) {
-    return res.status(err.status || 500).json({
-      error: err.message || 'Server Error',
-    });
+    next(err);
   }
 };
 
-const create_review = async (req, res) => {
-  const userId = getUserIdFromRequest(req);
+const create_review = async (req, res, next) => {
+  try {
+    const userId = getUserIdFromRequest(req);
 
-  const { name: reqName, rating, review: reqReview, url: reqUrl, watchAgain } = req.body;
+    const { name: reqName, rating, review: reqReview, url: reqUrl, watchAgain } = req.body;
 
-  const name = reqName && reqName.trim();
-  const review = reqReview && reqReview.trim();
-  const url = reqUrl && reqUrl.trim() && getPlatformOrMediaUrl(reqUrl);
+    const name = reqName && reqName.trim();
+    const review = reqReview && reqReview.trim();
+    const url = reqUrl && reqUrl.trim() && getPlatformOrMediaUrl(reqUrl);
 
-  if (!name) {
-    return res.status(422).json({
-      error: "Name can't be empty",
-    });
-  }
-
-  if (!review) {
-    return res.status(422).json({
-      error: "Review can't be empty",
-    });
-  }
-
-  const reviewExist = await Review.findOne({
-    where: {
-      userId,
-      name,
-    },
-  });
-
-  if (reviewExist) {
-    return res.status(409).json({
-      error: `Review for '${name}' already exists`,
-    });
-  }
-
-  const dbImg = await ImageController.get_image_by_name_from_database(name);
-  let imageId = null;
-
-  if (dbImg) {
-    imageId = dbImg.id;
-  } else {
-    const newDbImage = await ImageController.get_image_by_name_from_api(name);
-
-    if (newDbImage) {
-      imageId = newDbImage.id;
+    if (!name) {
+      return res.status(422).json({
+        error: "Name can't be empty",
+      });
     }
-  }
 
-  Review.create({
-    name,
-    rating,
-    review,
-    url,
-    userId,
-    watchAgain: watchAgain ?? false,
-    imageId,
-  })
-    .then(review => {
-      return res.status(201).json(review);
-    })
-    .catch(err => {
-      return res.status(err.status || 500).json({
-        error: err.message || 'Server Error',
+    if (!review) {
+      return res.status(422).json({
+        error: "Review can't be empty",
       });
-    });
-};
+    }
 
-const get_review_by_id = (req, res) => {
-  const userId = getUserIdFromRequest(req);
-  const reviewId = req.params.id;
-
-  Review.findOne({
-    where: {
-      id: reviewId,
-      userId,
-    },
-    include: [
-      {
-        model: Image,
-        as: 'image',
-        attributes: ['img'],
+    const reviewExist = await Review.findOne({
+      where: {
+        userId,
+        name,
       },
-    ],
-  })
-    .then(async review => {
-      if (!review) {
-        return res.status(404).json({
-          error: 'Review not found',
-        });
-      }
+    });
 
-      if (review.userId !== userId) {
-        return res.status(403).json({
-          error: 'Forbidden',
-        });
-      }
-
-      return res.status(200).json(review);
-    })
-    .catch(err => {
-      return res.status(err.status || 500).json({
-        error: err.message || 'Server Error',
+    if (reviewExist) {
+      return res.status(409).json({
+        error: `Review for '${name}' already exists`,
       });
-    });
-};
+    }
 
-const update_review_by_id = async (req, res) => {
-  const userId = getUserIdFromRequest(req);
-  const reviewId = req.params.id;
+    const dbImg = await ImageController.get_image_by_name_from_database(name);
+    let imageId = null;
 
-  const { rating, review: reqReview, url: reqUrl, watchAgain } = req.body;
-  const review = reqReview && reqReview.trim();
-  const url = reqUrl && reqUrl.trim() && getPlatformOrMediaUrl(reqUrl);
+    if (dbImg) {
+      imageId = dbImg.id;
+    } else {
+      const newDbImage = await ImageController.get_image_by_name_from_api(name);
 
-  if (!review) {
-    return res.status(422).json({
-      error: "Review can't be empty",
-    });
-  }
+      if (newDbImage) {
+        imageId = newDbImage.id;
+      }
+    }
 
-  Review.update(
-    {
+    const newReview = await Review.create({
+      name,
       rating,
       review,
       url,
-      watchAgain,
-    },
-    {
-      where: {
-        userId,
-        id: reviewId,
-      },
-    }
-  )
-    .then(() => {
-      Review.findOne({
-        where: {
-          id: reviewId,
-        },
-        include: [
-          {
-            model: Image,
-            as: 'image',
-            attributes: ['img'],
-          },
-        ],
-      })
-        .then(async review => {
-          if (!review) {
-            return res.status(404).json({
-              error: 'Review not found',
-            });
-          }
-
-          if (review.userId !== userId) {
-            return res.status(403).json({
-              error: 'Forbidden',
-            });
-          }
-
-          return res.status(200).json(review);
-        })
-        .catch(err => {
-          return res.status(err.status || 404).json({
-            error: err.message || 'Review Not Found',
-          });
-        });
-    })
-    .catch(err => {
-      return res.status(err.status || 500).json({
-        error: err.message || 'Server Error',
-      });
+      userId,
+      watchAgain: watchAgain ?? false,
+      imageId,
     });
+
+    return res.status(201).json(newReview);
+  } catch (err) {
+    next(err);
+  }
 };
 
-const delete_review_by_id = (req, res) => {
-  const userId = getUserIdFromRequest(req);
-  const reviewId = req.params.id;
+const get_review_by_id = async (req, res, next) => {
+  try {
+    const userId = getUserIdFromRequest(req);
+    const reviewId = req.params.id;
 
-  Review.destroy({
-    where: {
-      id: reviewId,
-      userId,
-    },
-  })
-    .then(() => {
-      return res.status(200).json(true);
-    })
-    .catch(err => {
-      return res.status(err.status || 500).json({
-        error: err.message || 'Something went wrong with deleting the review',
-      });
+    const review = await Review.findOne({
+      where: {
+        id: reviewId,
+        userId,
+      },
+      include: [
+        {
+          model: Image,
+          as: 'image',
+          attributes: ['img'],
+        },
+      ],
     });
+
+    if (!review) {
+      return res.status(404).json({
+        error: 'Review not found',
+      });
+    }
+
+    if (review.userId !== userId) {
+      return res.status(403).json({
+        error: 'Forbidden',
+      });
+    }
+
+    return res.status(200).json(review);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const update_review_by_id = async (req, res, next) => {
+  try {
+    const userId = getUserIdFromRequest(req);
+    const reviewId = req.params.id;
+
+    const { rating, review: reqReview, url: reqUrl, watchAgain } = req.body;
+    const review = reqReview && reqReview.trim();
+    const url = reqUrl && reqUrl.trim() && getPlatformOrMediaUrl(reqUrl);
+
+    if (!review) {
+      return res.status(422).json({
+        error: "Review can't be empty",
+      });
+    }
+
+    await Review.update(
+      {
+        rating,
+        review,
+        url,
+        watchAgain,
+      },
+      {
+        where: {
+          userId,
+          id: reviewId,
+        },
+      }
+    );
+
+    const updatedReview = await Review.findOne({
+      where: {
+        id: reviewId,
+      },
+      include: [
+        {
+          model: Image,
+          as: 'image',
+          attributes: ['img'],
+        },
+      ],
+    });
+
+    if (!updatedReview) {
+      return res.status(404).json({
+        error: 'Review not found',
+      });
+    }
+
+    if (updatedReview.userId !== userId) {
+      return res.status(403).json({
+        error: 'Forbidden',
+      });
+    }
+
+    return res.status(200).json(updatedReview);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const delete_review_by_id = async (req, res, next) => {
+  try {
+    const userId = getUserIdFromRequest(req);
+    const reviewId = req.params.id;
+
+    await Review.destroy({
+      where: {
+        id: reviewId,
+        userId,
+      },
+    });
+
+    return res.status(200).json(true);
+  } catch (err) {
+    next(err);
+  }
 };
 
 module.exports = {
