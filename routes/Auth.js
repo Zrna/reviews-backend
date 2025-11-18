@@ -1,6 +1,7 @@
 const express = require('express');
 
 const AuthController = require('../controllers/AuthController');
+const { registerValidator, loginValidator } = require('../middlewares/validators');
 
 const router = express.Router();
 
@@ -70,7 +71,7 @@ const router = express.Router();
  *                  type: string
  *                  example: some error message
  */
-router.post('/register', AuthController.auth_register);
+router.post('/register', registerValidator, AuthController.auth_register);
 
 /**
  * @swagger
@@ -125,7 +126,7 @@ router.post('/register', AuthController.auth_register);
  *                  type: string
  *                  example: 'User does not exist'
  */
-router.post('/login', AuthController.auth_login);
+router.post('/login', loginValidator, AuthController.auth_login);
 
 /**
  *

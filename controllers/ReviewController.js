@@ -130,55 +130,34 @@ const create_review = async (req, res, next) => {
   try {
     const userId = getUserIdFromRequest(req);
 
-    const { name: reqName, rating, review: reqReview, url: reqUrl, watchAgain } = req.body;
-
-    const name = reqName && reqName.trim();
-    const review = reqReview && reqReview.trim();
-    const url = reqUrl && reqUrl.trim() && getPlatformOrMediaUrl(reqUrl);
-
-    if (!name) {
-      return res.status(422).json({
-        error: "Name can't be empty",
-      });
-    }
-
-    if (!review) {
-      return res.status(422).json({
-        error: "Review can't be empty",
-      });
-    }
+    const { name, review, rating, url, watchAgain } = req.body;
 
     const reviewExist = await Review.findOne({
       where: {
         userId,
-        name,
+        name: name.trim(),
       },
     });
 
     if (reviewExist) {
       return res.status(409).json({
-        error: `Review for '${name}' already exists`,
+        error: `Review for '${name.trim()}' already exists`,
       });
     }
 
-    const dbImg = await ImageController.get_image_by_name_from_database(name);
-    let imageId = null;
+    const dbImg = await ImageController.get_image_by_name_from_database(name.trim().toLowerCase());
+    let imageId = dbImg ? dbImg.id : null;
 
-    if (dbImg) {
-      imageId = dbImg.id;
-    } else {
-      const newDbImage = await ImageController.get_image_by_name_from_api(name);
-
-      if (newDbImage) {
-        imageId = newDbImage.id;
-      }
+    if (!imageId) {
+      const newDbImage = await ImageController.get_image_by_name_from_api(name.trim());
+      imageId = newDbImage ? newDbImage.id : null;
     }
 
     const newReview = await Review.create({
-      name,
-      rating,
-      review,
-      url,
+      name: name.trim(),
+      rating: rating || null,
+      review: review.trim(),
+      url: url ? getPlatformOrMediaUrl(url.trim()) : null,
       userId,
       watchAgain: watchAgain ?? false,
       imageId,
@@ -211,13 +190,7 @@ const get_review_by_id = async (req, res, next) => {
 
     if (!review) {
       return res.status(404).json({
-        error: 'Review not found',
-      });
-    }
-
-    if (review.userId !== userId) {
-      return res.status(403).json({
-        error: 'Forbidden',
+        error: `Review with id ${reviewId} not found`,
       });
     }
 
@@ -232,22 +205,27 @@ const update_review_by_id = async (req, res, next) => {
     const userId = getUserIdFromRequest(req);
     const reviewId = req.params.id;
 
-    const { rating, review: reqReview, url: reqUrl, watchAgain } = req.body;
-    const review = reqReview && reqReview.trim();
-    const url = reqUrl && reqUrl.trim() && getPlatformOrMediaUrl(reqUrl);
+    const { review, rating, url, watchAgain } = req.body;
 
-    if (!review) {
-      return res.status(422).json({
-        error: "Review can't be empty",
+    const reviewToUpdate = await Review.findOne({
+      where: {
+        userId,
+        id: reviewId,
+      },
+    });
+
+    if (!reviewToUpdate) {
+      return res.status(404).json({
+        error: `Review with id ${reviewId} not found`,
       });
     }
 
     await Review.update(
       {
-        rating,
-        review,
-        url,
-        watchAgain,
+        rating: rating !== undefined ? rating : reviewToUpdate.rating,
+        review: review ? review.trim() : reviewToUpdate.review,
+        url: url ? getPlatformOrMediaUrl(url.trim()) : reviewToUpdate.url,
+        watchAgain: watchAgain !== undefined ? watchAgain : reviewToUpdate.watchAgain,
       },
       {
         where: {
@@ -269,18 +247,6 @@ const update_review_by_id = async (req, res, next) => {
         },
       ],
     });
-
-    if (!updatedReview) {
-      return res.status(404).json({
-        error: 'Review not found',
-      });
-    }
-
-    if (updatedReview.userId !== userId) {
-      return res.status(403).json({
-        error: 'Forbidden',
-      });
-    }
 
     return res.status(200).json(updatedReview);
   } catch (err) {

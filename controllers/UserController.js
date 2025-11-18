@@ -32,18 +32,6 @@ const update_account = async (req, res, next) => {
 
     const { firstName, lastName } = req.body;
 
-    if (!firstName) {
-      return res.status(422).json({
-        error: "First name can't be empty",
-      });
-    }
-
-    if (!lastName) {
-      return res.status(422).json({
-        error: "Last name can't be empty",
-      });
-    }
-
     await User.update(
       {
         firstName: firstName.trim(),

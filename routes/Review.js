@@ -2,6 +2,7 @@ const express = require('express');
 
 const ReviewController = require('../controllers/ReviewController');
 const { validateToken } = require('../middlewares/token');
+const { createReviewValidator, updateReviewValidator, reviewIdValidator } = require('../middlewares/validators');
 
 const router = express.Router();
 
@@ -436,7 +437,7 @@ router.get('/api/reviews/grouped-by-ratings/:rating', ReviewController.get_revie
  *            schema:
  *              $ref: '#/definitions/ReviewServerError'
  */
-router.post('/api/reviews', ReviewController.create_review);
+router.post('/api/reviews', createReviewValidator, ReviewController.create_review);
 
 /**
  * @swagger
@@ -480,7 +481,7 @@ router.post('/api/reviews', ReviewController.create_review);
  *            schema:
  *              $ref: '#/definitions/ReviewServerError'
  */
-router.get('/api/reviews/:id', ReviewController.get_review_by_id);
+router.get('/api/reviews/:id', reviewIdValidator, ReviewController.get_review_by_id);
 
 /**
  * @swagger
@@ -565,7 +566,7 @@ router.get('/api/reviews/:id', ReviewController.get_review_by_id);
  *           schema:
  *             $ref: '#/definitions/ReviewServerError'
  */
-router.put('/api/reviews/:id', ReviewController.update_review_by_id);
+router.put('/api/reviews/:id', updateReviewValidator, ReviewController.update_review_by_id);
 
 /**
  * @swagger
@@ -593,6 +594,6 @@ router.put('/api/reviews/:id', ReviewController.update_review_by_id);
  *           schema:
  *             $ref: '#/definitions/ReviewServerError'
  */
-router.delete('/api/reviews/:id', ReviewController.delete_review_by_id);
+router.delete('/api/reviews/:id', reviewIdValidator, ReviewController.delete_review_by_id);
 
 module.exports = router;

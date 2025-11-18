@@ -2,6 +2,7 @@ const express = require('express');
 
 const UserController = require('../controllers/UserController');
 const { validateToken } = require('../middlewares/token');
+const { updateAccountValidator } = require('../middlewares/validators');
 
 const router = express.Router();
 
@@ -122,7 +123,7 @@ router.get('/api/account', UserController.get_account);
  *                  type: string
  *                  example: Something went wrong with updating the account data.
  */
-router.put('/api/account', UserController.update_account);
+router.put('/api/account', updateAccountValidator, UserController.update_account);
 
 /**
  * @swagger

@@ -7,30 +7,6 @@ const auth_register = async (req, res, next) => {
   try {
     const { email, firstName, lastName, password } = req.body;
 
-    if (!password) {
-      return res.status(422).json({
-        error: "Password can't be empty",
-      });
-    }
-
-    if (!email) {
-      return res.status(422).json({
-        error: "Email can't be empty",
-      });
-    }
-
-    if (!firstName) {
-      return res.status(422).json({
-        error: "First name can't be empty",
-      });
-    }
-
-    if (!lastName) {
-      return res.status(422).json({
-        error: "Last name can't be empty",
-      });
-    }
-
     const emailExist = await User.findOne({
       where: {
         email: email.trim(),
