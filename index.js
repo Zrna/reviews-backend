@@ -15,6 +15,7 @@ const swaggerUI = require('swagger-ui-express');
 const swaggerOptions = require('./config/swaggerOptions');
 const db = require('./models');
 const { errorHandler } = require('./middlewares/errorHandler');
+const { apiLimiter } = require('./middlewares/rateLimiter');
 const authRoutes = require('./routes/Auth');
 const userRoutes = require('./routes/User');
 const reviewRoutes = require('./routes/Review');
@@ -53,6 +54,9 @@ app.use(
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Apply rate limiting to all routes
+app.use(apiLimiter);
 
 app.use(authRoutes);
 app.use(userRoutes);
