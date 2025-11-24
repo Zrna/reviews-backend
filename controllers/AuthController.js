@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 
 const { User } = require('../models');
-const { createAccessToken } = require('../utils/token');
+const { createAccessToken, COOKIE_MAX_AGE } = require('../utils/token');
 
 const auth_register = async (req, res, next) => {
   try {
@@ -35,8 +35,7 @@ const auth_register = async (req, res, next) => {
     const accessToken = createAccessToken(user);
 
     res.cookie('access-token', accessToken, {
-      maxAge: 60 * 60 * 24 * 30 * 1000, // expires after 30 days
-      // TODO: implement secure cookie settings
+      maxAge: COOKIE_MAX_AGE,
       // httpOnly: true, // if active, can't read cookie from the frontend
       secure: process.env.NODE_ENV === 'production', // only send over HTTPS in production
       sameSite: 'lax', // CSRF protection while allowing cross-site GET requests
@@ -79,7 +78,7 @@ const auth_login = async (req, res, next) => {
     const accessToken = createAccessToken(user);
 
     res.cookie('access-token', accessToken, {
-      maxAge: 60 * 60 * 24 * 30 * 1000, // expires after 30 days
+      maxAge: COOKIE_MAX_AGE,
       // httpOnly: true, // if active, can't read cookie from the frontend
       secure: process.env.NODE_ENV === 'production', // only send over HTTPS in production
       sameSite: 'lax', // CSRF protection while allowing cross-site GET requests
