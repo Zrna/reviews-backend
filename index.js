@@ -6,6 +6,7 @@ const { validateEnv } = require('./utils/validateEnv');
 validateEnv();
 
 const cookieParser = require('cookie-parser');
+const compression = require('compression');
 const cors = require('cors');
 const express = require('express');
 const morgan = require('morgan');
@@ -44,6 +45,9 @@ if (process.env.NODE_ENV === 'production') {
   // Log when request completes (with timing)
   app.use(morgan('dev'));
 }
+
+// Enable gzip compression for all responses
+app.use(compression());
 
 app.use(cookieParser());
 app.use(
