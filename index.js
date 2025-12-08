@@ -17,6 +17,7 @@ const swaggerOptions = require('./config/swaggerOptions');
 const db = require('./models');
 const { errorHandler } = require('./middlewares/errorHandler');
 const { apiLimiter } = require('./middlewares/rateLimiter');
+const statusRoutes = require('./routes/Status');
 const authRoutes = require('./routes/Auth');
 const userRoutes = require('./routes/User');
 const reviewRoutes = require('./routes/Review');
@@ -61,6 +62,9 @@ app.use(express.urlencoded({ extended: false }));
 
 // Apply rate limiting to all routes
 app.use(apiLimiter);
+
+// Status check endpoint - no authentication required
+app.use(statusRoutes);
 
 app.use(authRoutes);
 app.use(userRoutes);
