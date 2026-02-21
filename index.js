@@ -9,11 +9,10 @@ const cookieParser = require('cookie-parser');
 const compression = require('compression');
 const cors = require('cors');
 const express = require('express');
+const fs = require('fs');
 const morgan = require('morgan');
-const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUI = require('swagger-ui-express');
 
-const swaggerOptions = require('./config/swaggerOptions');
 const db = require('./models');
 const { errorHandler } = require('./middlewares/errorHandler');
 const { apiLimiter } = require('./middlewares/rateLimiter');
@@ -31,8 +30,35 @@ db.sequelize
   .then(() => console.log('Database connected'))
   .catch(error => console.log('Database connection error:', error));
 
-const swaggerDocs = swaggerJsDoc(swaggerOptions);
-app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
+// Load auto-generated Swagger documentation
+let swaggerDocument;
+try {
+  swaggerDocument = JSON.parse(fs.readFileSync('./swagger-output.json', 'utf8'));
+} catch (error) {
+  console.warn('⚠️  Swagger documentation not found. Run: npm run swagger');
+  console.warn('   API docs will not be available at /api-docs');
+  swaggerDocument = null;
+}
+
+if (swaggerDocument) {
+  // Swagger UI at /api-docs
+  app.use(
+    '/api-docs',
+    swaggerUI.serve,
+    swaggerUI.setup(swaggerDocument, {
+      swaggerOptions: {
+        docExpansion: 'none', // Keep all sections collapsed by default
+        defaultModelsExpandDepth: 3,
+        defaultModelExpandDepth: 3,
+      },
+    })
+  );
+
+  // Raw JSON spec at /api-docs/swagger.json for openapi-typescript
+  app.get('/api-docs/swagger.json', (req, res) => {
+    res.json(swaggerDocument);
+  });
+}
 
 // Add request logging - logs when request starts and completes
 if (process.env.NODE_ENV === 'production') {

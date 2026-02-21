@@ -7,60 +7,27 @@ const router = express.Router();
 
 const startTime = Date.now();
 
-/**
- * @swagger
- * /status:
- *  get:
- *    tags:
- *      - status
- *    summary: Status check endpoint
- *    description: Returns application status, database connectivity, uptime, and version
- *    responses:
- *      200:
- *        description: Application is healthy
- *        content:
- *          application/json:
- *            schema:
- *              type: object
- *              properties:
- *                status:
- *                  type: string
- *                  example: healthy
- *                uptime:
- *                  type: string
- *                  example: 2h 15m 30s
- *                version:
- *                  type: string
- *                  example: 1.0.0
- *                database:
- *                  type: object
- *                  properties:
- *                    status:
- *                      type: string
- *                      example: connected
- *                timestamp:
- *                  type: string
- *                  example: 2025-12-08T10:30:00.000Z
- *      503:
- *        description: Service unavailable - database connection failed
- *        content:
- *          application/json:
- *            schema:
- *              type: object
- *              properties:
- *                status:
- *                  type: string
- *                  example: unhealthy
- *                database:
- *                  type: object
- *                  properties:
- *                    status:
- *                      type: string
- *                      example: disconnected
- *                    error:
- *                      type: string
- *                      example: Connection refused
- */
+// #swagger.tags = ['Status']
+// #swagger.summary = 'Health check endpoint'
+// #swagger.description = 'Returns application status, database connectivity, uptime, and version'
+/* #swagger.responses[200] = {
+      description: 'Application is healthy',
+      content: {
+        "application/json": {
+          schema: { $ref: "#/definitions/StatusResponse" }
+        }
+      }
+    }
+*/
+/* #swagger.responses[503] = {
+      description: 'Service unavailable - database connection failed',
+      content: {
+        "application/json": {
+          schema: { $ref: "#/definitions/ErrorResponse" }
+        }
+      }
+    }
+*/
 router.get('/status', async (req, res) => {
   const uptime = Date.now() - startTime;
   const hours = Math.floor(uptime / (1000 * 60 * 60));

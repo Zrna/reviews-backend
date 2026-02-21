@@ -8,53 +8,24 @@ const router = express.Router();
 
 router.use(validateToken);
 
-/**
- * @swagger
- * /api/account:
- *  get:
- *    tags:
- *      - account
- *    summary: Get account data
- *    description: Required `access-token` in cookies
- *    responses:
- *      200:
- *        description: User account data
- *        content:
- *          application/json:
- *            schema:
- *              type: object
- *              properties:
- *                id:
- *                  type: number
- *                  example: 1
- *                email:
- *                  type: string
- *                  example: zrna@gmail.com
- *                firstName:
- *                  type: string
- *                  example: Luka
- *                lastName:
- *                  type: string
- *                  example: Zrnic
- *                createdAt:
- *                  type: string
- *                  example: 2021-04-18T10:02:07.000Z
- *                updatedAt:
- *                  type: string
- *                  example: 2021-04-18T10:02:07.000Z
- *      401:
- *        description: No `access-token` in cookies
- *        content:
- *          application/json:
- *            schema:
- *              type: object
- *              properties:
- *                error:
- *                  type: string
- *                  example: Access token is missing
- */
+// #swagger.tags = ['User']
+// #swagger.summary = 'Get user account data'
+// #swagger.description = 'Returns authenticated user account information'
+/* #swagger.security = [{ "cookieAuth": [] }, { "bearerAuth": [] }] */
+/* #swagger.responses[200] = {
+      description: 'User account data',
+      content: {
+        "application/json": {
+          schema: { $ref: "#/definitions/User" }
+        }
+      }
+    }
+*/
 router.get('/api/account', UserController.get_account);
 
+// #swagger.tags = ['User']
+// #swagger.summary = 'Update user account'
+// #swagger.security = [{ "cookieAuth": [] }, { "bearerAuth": [] }]
 /**
  * @swagger
  * /api/account:
@@ -125,6 +96,9 @@ router.get('/api/account', UserController.get_account);
  */
 router.put('/api/account', updateAccountValidator, UserController.update_account);
 
+// #swagger.tags = ['User']
+// #swagger.summary = 'Delete user account'
+// #swagger.security = [{ "cookieAuth": [] }, { "bearerAuth": [] }]
 /**
  * @swagger
  * /api/account:

@@ -11,6 +11,8 @@
   },
   "scripts": {
     "start": "nodemon index.js",
+    "swagger": "node swagger.js",
+    "swagger:dev": "node swagger.js && npm start",
     "lint": "eslint . --ext .js",
     "lint:fix": "npm run lint -- --fix",
     "migration:generate": "npx sequelize migration:generate --name",
@@ -58,6 +60,7 @@
     "lint-staged": "^10.5.4",
     "nodemon": "^3.1.11",
     "prettier": "^3.6.2",
+    "swagger-autogen": "^2.23.7",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
   }
