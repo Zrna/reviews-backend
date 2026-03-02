@@ -16,6 +16,7 @@ const validateToken = (req, res, next) => {
   if (!accessToken) {
     return res.status(401).json({
       error: 'Access token is missing',
+      requestId: req.id,
     });
   }
 
@@ -61,6 +62,7 @@ const validateToken = (req, res, next) => {
     if (error.name === 'TokenExpiredError') {
       return res.status(401).json({
         error: 'Token has expired. Please login again.',
+        requestId: req.id,
       });
     }
 
@@ -68,12 +70,14 @@ const validateToken = (req, res, next) => {
     if (error.name === 'JsonWebTokenError') {
       return res.status(401).json({
         error: 'Invalid token. Please login again.',
+        requestId: req.id,
       });
     }
 
     // Other token validation errors
     return res.status(401).json({
       error: 'Token validation failed',
+      requestId: req.id,
     });
   }
 };

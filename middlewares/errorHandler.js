@@ -4,8 +4,9 @@
  */
 // eslint-disable-next-line no-unused-vars
 const errorHandler = (err, req, res, next) => {
-  // Log the error for debugging
-  console.error('errorHandler - Error:', err);
+  // Log the error for debugging (include request ID and user ID for tracing)
+  const userId = req.userId || 'anonymous';
+  console.error(`errorHandler [${req.id || 'no-request-id'}] [user:${userId}] - Error:`, err);
 
   // Default error status and message
   const statusCode = err.statusCode || err.status || 500;
@@ -15,6 +16,7 @@ const errorHandler = (err, req, res, next) => {
   if (err.name === 'SequelizeValidationError') {
     return res.status(400).json({
       error: 'Validation Error',
+      requestId: req.id,
       details: err.errors.map(e => ({
         field: e.path,
         message: e.message,
@@ -26,6 +28,7 @@ const errorHandler = (err, req, res, next) => {
   if (err.name === 'SequelizeUniqueConstraintError') {
     return res.status(409).json({
       error: 'Duplicate Entry',
+      requestId: req.id,
       details: err.errors.map(e => ({
         field: e.path,
         message: e.message,
@@ -37,6 +40,7 @@ const errorHandler = (err, req, res, next) => {
   if (err.name === 'SequelizeDatabaseError') {
     return res.status(500).json({
       error: 'Database Error',
+      requestId: req.id,
       message: process.env.NODE_ENV === 'production' ? 'An error occurred while processing your request' : err.message,
     });
   }
@@ -45,6 +49,7 @@ const errorHandler = (err, req, res, next) => {
   if (err.name === 'JsonWebTokenError') {
     return res.status(401).json({
       error: 'Invalid Token',
+      requestId: req.id,
       message: 'Authentication token is invalid',
     });
   }
@@ -52,6 +57,7 @@ const errorHandler = (err, req, res, next) => {
   if (err.name === 'TokenExpiredError') {
     return res.status(401).json({
       error: 'Token Expired',
+      requestId: req.id,
       message: 'Authentication token has expired',
     });
   }
@@ -59,6 +65,7 @@ const errorHandler = (err, req, res, next) => {
   // Default error response
   res.status(statusCode).json({
     error: process.env.NODE_ENV === 'production' && statusCode === 500 ? 'Internal Server Error' : message,
+    requestId: req.id,
     ...(process.env.NODE_ENV !== 'production' && { stack: err.stack }),
   });
 };

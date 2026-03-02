@@ -16,6 +16,7 @@ const swaggerUI = require('swagger-ui-express');
 const db = require('./models');
 const { errorHandler } = require('./middlewares/errorHandler');
 const { apiLimiter } = require('./middlewares/rateLimiter');
+const { requestId } = require('./middlewares/requestId');
 const statusRoutes = require('./routes/Status');
 const authRoutes = require('./routes/Auth');
 const userRoutes = require('./routes/User');
@@ -60,17 +61,28 @@ if (swaggerDocument) {
   });
 }
 
+// Assign a unique request ID to every incoming request
+app.use(requestId);
+
 // Add request logging - logs when request starts and completes
+// Define custom Morgan tokens
+morgan.token('id', req => req.id);
+morgan.token('userId', req => req.userId || 'anonymous');
+
 if (process.env.NODE_ENV === 'production') {
-  app.use(morgan('combined'));
+  app.use(
+    morgan(
+      ':id user::userId :remote-addr [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"'
+    )
+  );
 } else {
   // Log when request arrives (immediate)
   app.use((req, res, next) => {
-    console.log(`→ ${req.method} ${req.url}`);
+    console.log(`→ [${req.id}] ${req.method} ${req.url}`);
     next();
   });
-  // Log when request completes (with timing)
-  app.use(morgan('dev'));
+  // Log when request completes (with timing and user ID)
+  app.use(morgan(':id user::userId :method :url :status :response-time ms'));
 }
 
 // Enable gzip compression for all responses
@@ -97,9 +109,10 @@ app.use(userRoutes);
 app.use(reviewRoutes);
 app.use(recommendationRoutes);
 
-app.use('*', (_, res) => {
+app.use('*', (req, res) => {
   return res.status(404).send({
     error: 'Route Not Found',
+    requestId: req.id,
   });
 });
 

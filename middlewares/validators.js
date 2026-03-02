@@ -7,6 +7,7 @@ const handleValidationErrors = (req, res, next) => {
   if (!errors.isEmpty()) {
     return res.status(422).json({
       error: errors.array()[0].msg, // Return first error message for consistency with existing API
+      requestId: req.id,
     });
   }
 
