@@ -7,24 +7,32 @@ const ImageController = require('./ImageController');
 const get_all_reviews = async (req, res, next) => {
   try {
     const userId = getUserIdFromRequest(req);
+    const page = req.query.page || 1;
+    const pageSize = req.query.pageSize || 20;
+    const offset = (page - 1) * pageSize;
 
-    const reviews = await Review.findAll({
+    const { count, rows } = await Review.findAndCountAll({
       where: {
         userId,
       },
       order: [['updatedAt', 'DESC']],
+      limit: pageSize,
+      offset,
       include: [
         {
           model: Image,
           as: 'image',
-          attributes: ['img'], // Only select the 'img' attribute
+          attributes: ['img'],
         },
       ],
     });
 
     return res.status(200).json({
-      data: reviews,
-      totalRecords: reviews.length,
+      data: rows,
+      totalRecords: count,
+      page,
+      pageSize,
+      totalPages: Math.ceil(count / pageSize),
     });
   } catch (err) {
     next(err);
@@ -61,9 +69,7 @@ const get_latest_reviews = async (req, res, next) => {
 
 const get_reviews_grouped_by_ratings = async (req, res, next) => {
   const userId = getUserIdFromRequest(req);
-  const count = req.query.count ? parseInt(req.query.count) : 10;
   const rating = req.params.rating ? parseInt(req.params.rating) : null;
-  let ratings;
 
   if (isNaN(rating)) {
     return res.status(422).json({
@@ -71,51 +77,54 @@ const get_reviews_grouped_by_ratings = async (req, res, next) => {
     });
   }
 
-  if (isNaN(count)) {
-    return res.status(422).json({
-      error: 'Count must be a number',
-    });
-  }
-
-  if (typeof rating === 'number') {
-    if (rating < 0 || rating > 5) {
-      return res.status(422).json({
-        error: 'Rating must be between 0 and 5',
-      });
-    } else if (rating === 0) {
-      ratings = [null];
-    } else {
-      ratings = [rating];
-    }
-  } else {
-    ratings = [5, 4, 3, 2, 1, null];
-  }
-
   try {
+    // Single rating view — full pagination
+    if (typeof rating === 'number') {
+      if (rating < 0 || rating > 5) {
+        return res.status(422).json({
+          error: 'Rating must be between 0 and 5',
+        });
+      }
+
+      const page = req.query.page || 1;
+      const pageSize = req.query.pageSize || 20;
+      const offset = (page - 1) * pageSize;
+      const ratingValue = rating === 0 ? null : rating;
+
+      const { count, rows } = await Review.findAndCountAll({
+        where: { userId, rating: ratingValue },
+        limit: pageSize,
+        offset,
+        order: [['updatedAt', 'DESC']],
+        include: [{ model: Image, as: 'image', attributes: ['img'] }],
+      });
+
+      return res.status(200).json({
+        rating: ratingValue,
+        data: rows,
+        totalRecords: count,
+        page,
+        pageSize,
+        totalPages: Math.ceil(count / pageSize),
+      });
+    }
+
+    // Home screen — all rating groups, fixed limit of 10 per group
+    const ratings = [5, 4, 3, 2, 1, null];
+
     const groupedReviews = await Promise.all(
-      ratings.map(async rating => {
-        const reviews = await Review.findAll({
-          where: {
-            userId,
-            rating,
-          },
-          limit: count,
-          order: [
-            ['rating', 'DESC'],
-            ['updatedAt', 'DESC'],
-          ],
-          include: [
-            {
-              model: Image,
-              as: 'image',
-              attributes: ['img'],
-            },
-          ],
+      ratings.map(async ratingValue => {
+        const { count, rows } = await Review.findAndCountAll({
+          where: { userId, rating: ratingValue },
+          limit: 10,
+          order: [['updatedAt', 'DESC']],
+          include: [{ model: Image, as: 'image', attributes: ['img'] }],
         });
 
         return {
-          rating,
-          reviews,
+          rating: ratingValue,
+          reviews: rows,
+          totalRecords: count,
         };
       })
     );

@@ -1,4 +1,4 @@
-const { body, param, validationResult } = require('express-validator');
+const { body, param, query, validationResult } = require('express-validator');
 
 // Middleware to handle validation errors
 const handleValidationErrors = (req, res, next) => {
@@ -81,6 +81,13 @@ const reviewIdValidator = [
   handleValidationErrors,
 ];
 
+// Pagination validators
+const paginationValidator = [
+  query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer').toInt(),
+  query('pageSize').optional().isInt({ min: 1, max: 100 }).withMessage('Page size must be between 1 and 100').toInt(),
+  handleValidationErrors,
+];
+
 module.exports = {
   registerValidator,
   loginValidator,
@@ -88,4 +95,5 @@ module.exports = {
   createReviewValidator,
   updateReviewValidator,
   reviewIdValidator,
+  paginationValidator,
 };

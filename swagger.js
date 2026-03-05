@@ -233,7 +233,29 @@ swaggerAutogen(outputFile, endpointsFiles, doc, options).then(({ success, data }
           properties: {
             rating: { type: 'integer', nullable: true, example: 5 },
             reviews: { type: 'array', items: { $ref: '#/components/schemas/Review' } },
+            totalRecords: { type: 'integer', example: 28 },
           },
+        },
+      },
+      PaginatedReviewsResponse: {
+        type: 'object',
+        properties: {
+          data: { type: 'array', items: { $ref: '#/components/schemas/Review' } },
+          totalRecords: { type: 'integer', example: 42 },
+          page: { type: 'integer', example: 1 },
+          pageSize: { type: 'integer', example: 20 },
+          totalPages: { type: 'integer', example: 3 },
+        },
+      },
+      PaginatedRatingReviewsResponse: {
+        type: 'object',
+        properties: {
+          rating: { type: 'integer', nullable: true, example: 5 },
+          data: { type: 'array', items: { $ref: '#/components/schemas/Review' } },
+          totalRecords: { type: 'integer', example: 28 },
+          page: { type: 'integer', example: 1 },
+          pageSize: { type: 'integer', example: 20 },
+          totalPages: { type: 'integer', example: 2 },
         },
       },
     };
@@ -340,14 +362,8 @@ swaggerAutogen(outputFile, endpointsFiles, doc, options).then(({ success, data }
       },
       'get /api/reviews': {
         status: '200',
-        description: 'List of user reviews',
-        schema: {
-          type: 'object',
-          properties: {
-            data: { type: 'array', items: { $ref: '#/components/schemas/Review' } },
-            totalRecords: { type: 'integer', example: 10 },
-          },
-        },
+        description: 'Paginated list of user reviews',
+        schema: { $ref: '#/components/schemas/PaginatedReviewsResponse' },
       },
       'post /api/reviews': {
         status: '201',
@@ -388,8 +404,8 @@ swaggerAutogen(outputFile, endpointsFiles, doc, options).then(({ success, data }
       },
       'get /api/reviews/grouped-by-ratings/{rating}': {
         status: '200',
-        description: 'Reviews for specific rating',
-        schema: { $ref: '#/components/schemas/GroupedReviewsResponse' },
+        description: 'Paginated reviews for specific rating',
+        schema: { $ref: '#/components/schemas/PaginatedRatingReviewsResponse' },
         extra: { 422: errorResponse('Invalid rating parameter (must be 0-5)') },
       },
       'get /api/recommendation': {
