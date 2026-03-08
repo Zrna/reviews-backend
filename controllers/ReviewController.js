@@ -68,48 +68,8 @@ const get_latest_reviews = async (req, res, next) => {
 };
 
 const get_reviews_grouped_by_ratings = async (req, res, next) => {
-  const userId = getUserIdFromRequest(req);
-  const rating = req.params.rating ? parseInt(req.params.rating) : null;
-
-  if (isNaN(rating)) {
-    return res.status(422).json({
-      error: 'Rating must be a number',
-    });
-  }
-
   try {
-    // Single rating view — full pagination
-    if (typeof rating === 'number') {
-      if (rating < 0 || rating > 5) {
-        return res.status(422).json({
-          error: 'Rating must be between 0 and 5',
-        });
-      }
-
-      const page = req.query.page || 1;
-      const pageSize = req.query.pageSize || 20;
-      const offset = (page - 1) * pageSize;
-      const ratingValue = rating === 0 ? null : rating;
-
-      const { count, rows } = await Review.findAndCountAll({
-        where: { userId, rating: ratingValue },
-        limit: pageSize,
-        offset,
-        order: [['updatedAt', 'DESC']],
-        include: [{ model: Image, as: 'image', attributes: ['img'] }],
-      });
-
-      return res.status(200).json({
-        rating: ratingValue,
-        data: rows,
-        totalRecords: count,
-        page,
-        pageSize,
-        totalPages: Math.ceil(count / pageSize),
-      });
-    }
-
-    // Home screen — all rating groups, fixed limit of 10 per group
+    const userId = getUserIdFromRequest(req);
     const ratings = [5, 4, 3, 2, 1, null];
 
     const groupedReviews = await Promise.all(
@@ -130,6 +90,49 @@ const get_reviews_grouped_by_ratings = async (req, res, next) => {
     );
 
     return res.status(200).json(groupedReviews);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const get_reviews_by_rating = async (req, res, next) => {
+  const rating = parseInt(req.params.rating);
+
+  if (isNaN(rating)) {
+    return res.status(422).json({
+      error: 'Rating must be a number',
+    });
+  }
+
+  if (rating < 0 || rating > 5) {
+    return res.status(422).json({
+      error: 'Rating must be between 0 and 5',
+    });
+  }
+
+  try {
+    const userId = getUserIdFromRequest(req);
+    const page = req.query.page || 1;
+    const pageSize = req.query.pageSize || 20;
+    const offset = (page - 1) * pageSize;
+    const ratingValue = rating === 0 ? null : rating;
+
+    const { count, rows } = await Review.findAndCountAll({
+      where: { userId, rating: ratingValue },
+      limit: pageSize,
+      offset,
+      order: [['updatedAt', 'DESC']],
+      include: [{ model: Image, as: 'image', attributes: ['img'] }],
+    });
+
+    return res.status(200).json({
+      rating: ratingValue,
+      data: rows,
+      totalRecords: count,
+      page,
+      pageSize,
+      totalPages: Math.ceil(count / pageSize),
+    });
   } catch (err) {
     next(err);
   }
@@ -289,4 +292,5 @@ module.exports = {
   update_review_by_id,
   get_latest_reviews,
   get_reviews_grouped_by_ratings,
+  get_reviews_by_rating,
 };

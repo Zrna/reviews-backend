@@ -28,11 +28,10 @@ router.get('/api/reviews/latest', ReviewController.get_latest_reviews);
 // #swagger.security = [{ "cookieAuth": [] }, { "bearerAuth": [] }]
 router.get('/api/reviews/grouped-by-ratings', ReviewController.get_reviews_grouped_by_ratings);
 
-router.get(
-  '/api/reviews/grouped-by-ratings/:rating',
-  paginationValidator,
-  ReviewController.get_reviews_grouped_by_ratings
-);
+// #swagger.tags = ['Reviews']
+// #swagger.summary = 'Get reviews by rating'
+// #swagger.security = [{ "cookieAuth": [] }, { "bearerAuth": [] }]
+router.get('/api/reviews/rating/:rating', paginationValidator, ReviewController.get_reviews_by_rating);
 
 // #swagger.tags = ['Reviews']
 // #swagger.summary = 'Create a new review'
