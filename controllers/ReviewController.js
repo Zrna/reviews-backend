@@ -27,12 +27,16 @@ const get_all_reviews = async (req, res, next) => {
       ],
     });
 
+    const totalPages = Math.ceil(count / pageSize);
+
     return res.status(200).json({
       data: rows,
       totalRecords: count,
       page,
       pageSize,
-      totalPages: Math.ceil(count / pageSize),
+      totalPages,
+      hasPreviousPage: page > 1,
+      hasNextPage: totalPages > page,
     });
   } catch (err) {
     next(err);
@@ -125,13 +129,17 @@ const get_reviews_by_rating = async (req, res, next) => {
       include: [{ model: Image, as: 'image', attributes: ['img'] }],
     });
 
+    const totalPages = Math.ceil(count / pageSize);
+
     return res.status(200).json({
       rating: ratingValue,
       data: rows,
       totalRecords: count,
       page,
       pageSize,
-      totalPages: Math.ceil(count / pageSize),
+      totalPages,
+      hasPreviousPage: page > 1,
+      hasNextPage: totalPages > page,
     });
   } catch (err) {
     next(err);
