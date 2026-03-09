@@ -8,6 +8,7 @@ const {
   reviewIdValidator,
   paginationValidator,
 } = require('../middlewares/validators');
+const { pagination } = require('../middlewares/pagination');
 
 const router = express.Router();
 
@@ -16,7 +17,7 @@ router.use(validateToken);
 // #swagger.tags = ['Reviews']
 // #swagger.summary = 'Get all user reviews'
 // #swagger.security = [{ "cookieAuth": [] }, { "bearerAuth": [] }]
-router.get('/api/reviews', paginationValidator, ReviewController.get_all_reviews);
+router.get('/api/reviews', paginationValidator, pagination, ReviewController.get_all_reviews);
 
 // #swagger.tags = ['Reviews']
 // #swagger.summary = 'Get latest reviews'
@@ -31,7 +32,7 @@ router.get('/api/reviews/grouped-by-ratings', ReviewController.get_reviews_group
 // #swagger.tags = ['Reviews']
 // #swagger.summary = 'Get reviews by rating'
 // #swagger.security = [{ "cookieAuth": [] }, { "bearerAuth": [] }]
-router.get('/api/reviews/rating/:rating', paginationValidator, ReviewController.get_reviews_by_rating);
+router.get('/api/reviews/rating/:rating', paginationValidator, pagination, ReviewController.get_reviews_by_rating);
 
 // #swagger.tags = ['Reviews']
 // #swagger.summary = 'Create a new review'

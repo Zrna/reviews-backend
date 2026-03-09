@@ -1,15 +1,14 @@
 const { Review, Image } = require('../models');
 const { getUserIdFromRequest } = require('../utils/user');
 const { getPlatformOrMediaUrl } = require('../utils/platforms');
+const { paginationMeta } = require('../utils/pagination');
 
 const ImageController = require('./ImageController');
 
 const get_all_reviews = async (req, res, next) => {
   try {
     const userId = getUserIdFromRequest(req);
-    const page = req.query.page || 1;
-    const pageSize = req.query.pageSize || 20;
-    const offset = (page - 1) * pageSize;
+    const { page, pageSize, offset } = req.pagination;
 
     const { count, rows } = await Review.findAndCountAll({
       where: {
@@ -27,16 +26,9 @@ const get_all_reviews = async (req, res, next) => {
       ],
     });
 
-    const totalPages = Math.ceil(count / pageSize);
-
     return res.status(200).json({
       data: rows,
-      totalRecords: count,
-      page,
-      pageSize,
-      totalPages,
-      hasPreviousPage: page > 1,
-      hasNextPage: totalPages > page,
+      ...paginationMeta({ count, page, pageSize }),
     });
   } catch (err) {
     next(err);
@@ -116,9 +108,7 @@ const get_reviews_by_rating = async (req, res, next) => {
 
   try {
     const userId = getUserIdFromRequest(req);
-    const page = req.query.page || 1;
-    const pageSize = req.query.pageSize || 20;
-    const offset = (page - 1) * pageSize;
+    const { page, pageSize, offset } = req.pagination;
     const ratingValue = rating === 0 ? null : rating;
 
     const { count, rows } = await Review.findAndCountAll({
@@ -129,17 +119,10 @@ const get_reviews_by_rating = async (req, res, next) => {
       include: [{ model: Image, as: 'image', attributes: ['img'] }],
     });
 
-    const totalPages = Math.ceil(count / pageSize);
-
     return res.status(200).json({
       rating: ratingValue,
       data: rows,
-      totalRecords: count,
-      page,
-      pageSize,
-      totalPages,
-      hasPreviousPage: page > 1,
-      hasNextPage: totalPages > page,
+      ...paginationMeta({ count, page, pageSize }),
     });
   } catch (err) {
     next(err);
