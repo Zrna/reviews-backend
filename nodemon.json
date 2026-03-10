@@ -1,0 +1,5 @@
+{
+  "watch": ["index.js", "index.ts", "config", "controllers", "middlewares", "models", "routes", "utils"],
+  "ext": "ts,js,json",
+  "exec": "ts-node index.js"
+}

@@ -2,7 +2,7 @@
  * Global error handler middleware
  * Catches all errors and sends consistent error responses
  */
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 const errorHandler = (err, req, res, next) => {
   // Log the error for debugging (include request ID and user ID for tracing)
   const userId = req.userId || 'anonymous';
