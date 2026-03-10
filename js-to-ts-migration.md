@@ -110,7 +110,7 @@ Update `.eslintrc.json`: set `parser` to `@typescript-eslint/parser`, add `plugi
 
 ---
 
-## Phase 1 — Shared Type Definitions
+## Phase 1 — Shared Type Definitions ✅
 
 Pure additive work — new files only, no renames.
 
