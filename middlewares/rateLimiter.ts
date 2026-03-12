@@ -1,24 +1,25 @@
-const rateLimit = require('express-rate-limit');
+import { Request, Response } from 'express';
+import rateLimit from 'express-rate-limit';
 
 // General API rate limiter - applied to all API routes
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // Limit each IP to 100 requests per windowMs
-  message: req => ({
+  message: (req: Request) => ({
     error: 'Too many requests from this IP, please try again later.',
     requestId: req.id,
   }),
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
   // Skip rate limiting for successful responses in development
-  skip: (req, res) => process.env.NODE_ENV === 'development' && res.statusCode < 400,
+  skip: (_req: Request, res: Response) => process.env.NODE_ENV === 'development' && res.statusCode < 400,
 });
 
 // Strict rate limiter for login endpoint - prevent brute force attacks
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 10, // Limit each IP to 10 login attempts per windowMs
-  message: req => ({
+  message: (req: Request) => ({
     error: 'Too many login attempts. Please try again later.',
     requestId: req.id,
   }),
@@ -34,7 +35,7 @@ const loginLimiter = rateLimit({
 const registerLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 3, // Limit each IP to 3 account creations per hour
-  message: req => ({
+  message: (req: Request) => ({
     error: 'Too many accounts created. Please try again later.',
     requestId: req.id,
   }),
@@ -42,8 +43,4 @@ const registerLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-module.exports = {
-  apiLimiter,
-  loginLimiter,
-  registerLimiter,
-};
+export { apiLimiter, loginLimiter, registerLimiter };

@@ -1,7 +1,8 @@
-const { body, param, query, validationResult } = require('express-validator');
+import { NextFunction, Request, Response } from 'express';
+import { body, param, query, validationResult } from 'express-validator';
 
 // Middleware to handle validation errors
-const handleValidationErrors = (req, res, next) => {
+const handleValidationErrors = (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -88,12 +89,12 @@ const paginationValidator = [
   handleValidationErrors,
 ];
 
-module.exports = {
-  registerValidator,
-  loginValidator,
-  updateAccountValidator,
+export {
   createReviewValidator,
-  updateReviewValidator,
-  reviewIdValidator,
+  loginValidator,
   paginationValidator,
+  registerValidator,
+  reviewIdValidator,
+  updateAccountValidator,
+  updateReviewValidator,
 };

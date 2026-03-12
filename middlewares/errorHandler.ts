@@ -1,9 +1,17 @@
+import { NextFunction, Request, Response } from 'express';
+
+interface AppError extends Error {
+  statusCode?: number;
+  status?: number;
+  errors?: { path: string; message: string }[];
+}
+
 /**
  * Global error handler middleware
  * Catches all errors and sends consistent error responses
  */
-// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-const errorHandler = (err, req, res, next) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const errorHandler = (err: AppError, req: Request, res: Response, next: NextFunction) => {
   // Log the error for debugging (include request ID and user ID for tracing)
   const userId = req.userId || 'anonymous';
   console.error(`errorHandler [${req.id || 'no-request-id'}] [user:${userId}] - Error:`, err);
@@ -17,7 +25,7 @@ const errorHandler = (err, req, res, next) => {
     return res.status(400).json({
       error: 'Validation Error',
       requestId: req.id,
-      details: err.errors.map(e => ({
+      details: err.errors?.map(e => ({
         field: e.path,
         message: e.message,
       })),
@@ -29,7 +37,7 @@ const errorHandler = (err, req, res, next) => {
     return res.status(409).json({
       error: 'Duplicate Entry',
       requestId: req.id,
-      details: err.errors.map(e => ({
+      details: err.errors?.map(e => ({
         field: e.path,
         message: e.message,
       })),
@@ -70,6 +78,4 @@ const errorHandler = (err, req, res, next) => {
   });
 };
 
-module.exports = {
-  errorHandler,
-};
+export { errorHandler };

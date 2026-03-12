@@ -1,9 +1,12 @@
-const { verify, sign } = require('jsonwebtoken');
-const { TOKEN_EXPIRATION, TOKEN_REFRESH_THRESHOLD, COOKIE_MAX_AGE } = require('../utils/token');
+import { NextFunction, Request, Response } from 'express';
+import { sign, verify } from 'jsonwebtoken';
 
-const validateToken = (req, res, next) => {
+import { JwtPayload } from '../types/api';
+import { COOKIE_MAX_AGE, TOKEN_EXPIRATION, TOKEN_REFRESH_THRESHOLD } from '../utils/token';
+
+const validateToken = (req: Request, res: Response, next: NextFunction) => {
   // Support both cookie-based (web) and Bearer token (mobile) authentication
-  let accessToken = req.cookies['access-token'];
+  let accessToken: string | undefined = req.cookies['access-token'];
 
   // If no cookie, check Authorization header for Bearer token (mobile clients)
   if (!accessToken && req.headers.authorization) {
@@ -21,7 +24,7 @@ const validateToken = (req, res, next) => {
   }
 
   try {
-    const decodedToken = verify(accessToken, process.env.TOKEN_SECRET);
+    const decodedToken = verify(accessToken, process.env.TOKEN_SECRET!) as JwtPayload;
 
     if (decodedToken) {
       req.authenticated = true;
@@ -38,7 +41,7 @@ const validateToken = (req, res, next) => {
             id: decodedToken.id,
             email: decodedToken.email,
           },
-          process.env.TOKEN_SECRET,
+          process.env.TOKEN_SECRET!,
           {
             expiresIn: TOKEN_EXPIRATION,
           }
@@ -57,9 +60,10 @@ const validateToken = (req, res, next) => {
 
       return next();
     }
-  } catch (error) {
+  } catch (error: unknown) {
+    const err = error as Error;
     // Handle expired tokens specifically
-    if (error.name === 'TokenExpiredError') {
+    if (err.name === 'TokenExpiredError') {
       return res.status(401).json({
         error: 'Token has expired. Please login again.',
         requestId: req.id,
@@ -67,7 +71,7 @@ const validateToken = (req, res, next) => {
     }
 
     // Handle invalid tokens
-    if (error.name === 'JsonWebTokenError') {
+    if (err.name === 'JsonWebTokenError') {
       return res.status(401).json({
         error: 'Invalid token. Please login again.',
         requestId: req.id,
@@ -82,6 +86,4 @@ const validateToken = (req, res, next) => {
   }
 };
 
-module.exports = {
-  validateToken,
-};
+export { validateToken };
