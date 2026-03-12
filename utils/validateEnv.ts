@@ -2,7 +2,7 @@
  * Validates that all required environment variables are present
  * Throws an error if any required variable is missing
  */
-const validateEnv = () => {
+export const validateEnv = (): void => {
   const requiredEnvVars = [
     'DB_HOST',
     'DB_USER',
@@ -34,5 +34,3 @@ const validateEnv = () => {
 
   console.log('✓ Environment variables validated successfully');
 };
-
-module.exports = { validateEnv };

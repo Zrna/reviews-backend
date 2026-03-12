@@ -19,6 +19,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false
   },
+  "files": ["types/express.d.ts"],
   "include": ["**/*.ts", "**/*.js"],
   "exclude": ["node_modules", "dist", "migrations", "utils/JSON"]
 }

@@ -1,11 +1,9 @@
+import { Request } from 'express';
+
 /**
  * Get the authenticated user's ID from the request.
  * Relies on validateToken middleware having set req.userId.
  */
-const getUserIdFromRequest = req => {
+export const getUserIdFromRequest = (req: Request): number | undefined => {
   return req.userId;
-};
-
-module.exports = {
-  getUserIdFromRequest,
 };

@@ -1,4 +1,4 @@
-const platformUrls = {
+const platformUrls: Record<string, string> = {
   netflix: 'https://www.netflix.com/',
   appletv: 'https://tv.apple.com/',
   amazonprime: 'https://www.primevideo.com/',
@@ -18,7 +18,7 @@ const platformUrls = {
   spotify: 'https://www.spotify.com/',
 };
 
-const getPlatformOrMediaUrl = value => {
+export const getPlatformOrMediaUrl = (value: string | null | undefined): string | null => {
   if (!value) {
     return null;
   } else if (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('www.')) {
@@ -32,8 +32,4 @@ const getPlatformOrMediaUrl = value => {
       return `https://www.${name}.com/`;
     }
   }
-};
-
-module.exports = {
-  getPlatformOrMediaUrl,
 };

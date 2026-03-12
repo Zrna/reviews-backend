@@ -141,7 +141,7 @@ Define shared response/payload types:
 
 ---
 
-## Phase 2 — Convert Utility Files (.js → .ts)
+## Phase 2 — Convert Utility Files (.js → .ts) ✅
 
 Start from leaf nodes (files imported by others but import nothing from the project).
 
@@ -304,6 +304,10 @@ Convert entry point last (all dependencies already typed). Key changes:
 ```bash
 npx tsc --noEmit && npx lint-staged
 ```
+
+### 8.6 Review notes
+
+- [ ] `process.env.TOKEN_SECRET!` non-null assertion in `utils/token.ts` — safe because `validateEnv()` checks at startup, but consider a stricter pattern (e.g. a typed config object)
 
 ---
 
