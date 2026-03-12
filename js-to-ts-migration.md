@@ -181,7 +181,7 @@ Start from leaf nodes (files imported by others but import nothing from the proj
 
 ---
 
-## Phase 4 — Convert Sequelize Models (.js → .ts)
+## Phase 4 — Convert Sequelize Models (.js → .ts) ✅
 
 Most architecturally significant change.
 
