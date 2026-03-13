@@ -1,16 +1,16 @@
-const express = require('express');
+import { Router } from 'express';
 
-const ReviewController = require('../controllers/ReviewController');
-const { validateToken } = require('../middlewares/token');
-const {
+import * as ReviewController from '../controllers/ReviewController';
+import { pagination } from '../middlewares/pagination';
+import { validateToken } from '../middlewares/token';
+import {
   createReviewValidator,
-  updateReviewValidator,
-  reviewIdValidator,
   paginationValidator,
-} = require('../middlewares/validators');
-const { pagination } = require('../middlewares/pagination');
+  reviewIdValidator,
+  updateReviewValidator,
+} from '../middlewares/validators';
 
-const router = express.Router();
+const router = Router();
 
 router.use(validateToken);
 
@@ -54,4 +54,4 @@ router.put('/api/reviews/:id', updateReviewValidator, ReviewController.update_re
 // #swagger.security = [{ "cookieAuth": [] }, { "bearerAuth": [] }]
 router.delete('/api/reviews/:id', reviewIdValidator, ReviewController.delete_review_by_id);
 
-module.exports = router;
+export = router;

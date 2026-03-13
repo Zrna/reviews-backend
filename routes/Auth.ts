@@ -1,10 +1,10 @@
-const express = require('express');
+import { Router } from 'express';
 
-const AuthController = require('../controllers/AuthController');
-const { registerValidator, loginValidator } = require('../middlewares/validators');
-const { registerLimiter, loginLimiter } = require('../middlewares/rateLimiter');
+import * as AuthController from '../controllers/AuthController';
+import { loginLimiter, registerLimiter } from '../middlewares/rateLimiter';
+import { loginValidator, registerValidator } from '../middlewares/validators';
 
-const router = express.Router();
+const router = Router();
 
 // #swagger.tags = ['Auth']
 // #swagger.summary = 'Register a new user'
@@ -21,4 +21,4 @@ router.post('/login', loginLimiter, loginValidator, AuthController.auth_login);
 // #swagger.description = 'Clears authentication token'
 router.post('/logout', AuthController.auth_logout);
 
-module.exports = router;
+export = router;

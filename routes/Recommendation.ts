@@ -1,9 +1,9 @@
-const express = require('express');
+import { Router } from 'express';
 
-const RecommendationController = require('../controllers/RecommendationController');
-const { validateToken } = require('../middlewares/token');
+import * as RecommendationController from '../controllers/RecommendationController';
+import { validateToken } from '../middlewares/token';
 
-const router = express.Router();
+const router = Router();
 
 router.use(validateToken);
 
@@ -21,4 +21,4 @@ router.use(validateToken);
 
 router.get('/api/recommendation', RecommendationController.get_recommendation);
 
-module.exports = router;
+export = router;

@@ -233,7 +233,7 @@ Image.initModel(sequelize);
 
 ---
 
-## Phase 6 — Convert Routes (.js → .ts)
+## Phase 6 — Convert Routes (.js → .ts) ✅
 
 Thin wiring files, all follow the same pattern:
 

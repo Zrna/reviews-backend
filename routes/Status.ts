@@ -1,9 +1,9 @@
-const express = require('express');
+import { Request, Response, Router } from 'express';
 
-const db = require('../models');
-const packageJson = require('../package.json');
+import { sequelize } from '../models';
+import packageJson from '../package.json';
 
-const router = express.Router();
+const router = Router();
 
 const startTime = Date.now();
 
@@ -28,7 +28,7 @@ const startTime = Date.now();
       }
     }
 */
-router.get('/status', async (req, res) => {
+router.get('/status', async (req: Request, res: Response) => {
   const uptime = Date.now() - startTime;
   const hours = Math.floor(uptime / (1000 * 60 * 60));
   const minutes = Math.floor((uptime % (1000 * 60 * 60)) / (1000 * 60));
@@ -37,7 +37,7 @@ router.get('/status', async (req, res) => {
 
   try {
     // Test database connectivity
-    await db.sequelize.authenticate();
+    await sequelize.authenticate();
 
     return res.status(200).json({
       status: 'healthy',
@@ -49,17 +49,19 @@ router.get('/status', async (req, res) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
     return res.status(503).json({
       status: 'unhealthy',
       uptime: uptimeString,
       version: packageJson.version,
       database: {
         status: 'disconnected',
-        error: error.message,
+        error: errorMessage,
       },
       timestamp: new Date().toISOString(),
     });
   }
 });
 
-module.exports = router;
+export = router;

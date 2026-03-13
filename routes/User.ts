@@ -1,10 +1,10 @@
-const express = require('express');
+import { Router } from 'express';
 
-const UserController = require('../controllers/UserController');
-const { validateToken } = require('../middlewares/token');
-const { updateAccountValidator } = require('../middlewares/validators');
+import * as UserController from '../controllers/UserController';
+import { validateToken } from '../middlewares/token';
+import { updateAccountValidator } from '../middlewares/validators';
 
-const router = express.Router();
+const router = Router();
 
 router.use(validateToken);
 
@@ -133,4 +133,4 @@ router.put('/api/account', updateAccountValidator, UserController.update_account
  */
 router.delete('/api/account', UserController.delete_account);
 
-module.exports = router;
+export = router;
