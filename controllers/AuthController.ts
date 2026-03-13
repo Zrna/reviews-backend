@@ -1,9 +1,10 @@
-const bcrypt = require('bcrypt');
+import bcrypt from 'bcrypt';
+import { NextFunction, Request, Response } from 'express';
 
-const { User } = require('../models');
-const { createAccessToken, COOKIE_MAX_AGE } = require('../utils/token');
+import { User } from '../models';
+import { COOKIE_MAX_AGE, createAccessToken } from '../utils/token';
 
-const auth_register = async (req, res, next) => {
+const auth_register = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, firstName, lastName, password } = req.body;
 
@@ -21,15 +22,11 @@ const auth_register = async (req, res, next) => {
 
     const hashPassword = await bcrypt.hash(password, 10);
 
-    await User.create({
+    const user = await User.create({
       email: email.trim(),
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       password: hashPassword,
-    });
-
-    const user = await User.findOne({
-      where: { email },
     });
 
     const accessToken = createAccessToken(user);
@@ -50,7 +47,7 @@ const auth_register = async (req, res, next) => {
   }
 };
 
-const auth_login = async (req, res, next) => {
+const auth_login = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, password } = req.body;
 
@@ -66,7 +63,7 @@ const auth_login = async (req, res, next) => {
       });
     }
 
-    const dbPassword = user.dataValues.password;
+    const dbPassword = user.password;
     const match = await bcrypt.compare(password, dbPassword);
 
     if (!match) {
@@ -90,14 +87,10 @@ const auth_login = async (req, res, next) => {
   }
 };
 
-const auth_logout = async (req, res) => {
+const auth_logout = async (req: Request, res: Response) => {
   res.clearCookie('access-token');
 
   return res.status(200).json('Logged out successfully');
 };
 
-module.exports = {
-  auth_login,
-  auth_register,
-  auth_logout,
-};
+export { auth_login, auth_logout, auth_register };

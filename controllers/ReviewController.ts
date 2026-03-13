@@ -1,14 +1,15 @@
-const { Review, Image } = require('../models');
-const { getUserIdFromRequest } = require('../utils/user');
-const { getPlatformOrMediaUrl } = require('../utils/platforms');
-const { paginationMeta } = require('../utils/pagination');
+import { NextFunction, Request, Response } from 'express';
 
-const ImageController = require('./ImageController');
+import { Image, Review } from '../models';
+import { DEFAULT_PAGINATION, paginationMeta } from '../utils/pagination';
+import { getPlatformOrMediaUrl } from '../utils/platforms';
+import { getUserIdFromRequest } from '../utils/user';
+import * as ImageController from './ImageController';
 
-const get_all_reviews = async (req, res, next) => {
+const get_all_reviews = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = getUserIdFromRequest(req);
-    const { page, pageSize, offset } = req.pagination;
+    const { page, pageSize, offset } = req.pagination ?? DEFAULT_PAGINATION;
 
     const { count, rows } = await Review.findAndCountAll({
       where: {
@@ -35,7 +36,7 @@ const get_all_reviews = async (req, res, next) => {
   }
 };
 
-const get_latest_reviews = async (req, res, next) => {
+const get_latest_reviews = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = getUserIdFromRequest(req);
 
@@ -63,7 +64,7 @@ const get_latest_reviews = async (req, res, next) => {
   }
 };
 
-const get_reviews_grouped_by_ratings = async (req, res, next) => {
+const get_reviews_grouped_by_ratings = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = getUserIdFromRequest(req);
     const ratings = [5, 4, 3, 2, 1, null];
@@ -91,8 +92,8 @@ const get_reviews_grouped_by_ratings = async (req, res, next) => {
   }
 };
 
-const get_reviews_by_rating = async (req, res, next) => {
-  const rating = parseInt(req.params.rating);
+const get_reviews_by_rating = async (req: Request, res: Response, next: NextFunction) => {
+  const rating = parseInt(req.params.rating as string);
 
   if (isNaN(rating)) {
     return res.status(422).json({
@@ -108,7 +109,7 @@ const get_reviews_by_rating = async (req, res, next) => {
 
   try {
     const userId = getUserIdFromRequest(req);
-    const { page, pageSize, offset } = req.pagination;
+    const { page, pageSize, offset } = req.pagination ?? DEFAULT_PAGINATION;
     const ratingValue = rating === 0 ? null : rating;
 
     const { count, rows } = await Review.findAndCountAll({
@@ -129,7 +130,7 @@ const get_reviews_by_rating = async (req, res, next) => {
   }
 };
 
-const create_review = async (req, res, next) => {
+const create_review = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = getUserIdFromRequest(req);
 
@@ -172,7 +173,7 @@ const create_review = async (req, res, next) => {
   }
 };
 
-const get_review_by_id = async (req, res, next) => {
+const get_review_by_id = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = getUserIdFromRequest(req);
     const reviewId = req.params.id;
@@ -203,7 +204,7 @@ const get_review_by_id = async (req, res, next) => {
   }
 };
 
-const update_review_by_id = async (req, res, next) => {
+const update_review_by_id = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = getUserIdFromRequest(req);
     const reviewId = req.params.id;
@@ -257,7 +258,7 @@ const update_review_by_id = async (req, res, next) => {
   }
 };
 
-const delete_review_by_id = async (req, res, next) => {
+const delete_review_by_id = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = getUserIdFromRequest(req);
     const reviewId = req.params.id;
@@ -275,13 +276,13 @@ const delete_review_by_id = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export {
   create_review,
   delete_review_by_id,
   get_all_reviews,
-  get_review_by_id,
-  update_review_by_id,
   get_latest_reviews,
-  get_reviews_grouped_by_ratings,
+  get_review_by_id,
   get_reviews_by_rating,
+  get_reviews_grouped_by_ratings,
+  update_review_by_id,
 };

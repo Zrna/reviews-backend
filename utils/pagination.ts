@@ -1,5 +1,13 @@
 import { PaginationMeta } from '../types/api';
 
+export const DEFAULT_PAGE = 1;
+export const DEFAULT_PAGE_SIZE = 20;
+export const DEFAULT_PAGINATION = {
+  page: DEFAULT_PAGE,
+  pageSize: DEFAULT_PAGE_SIZE,
+  offset: 0,
+};
+
 interface PaginationInput {
   count: number;
   page: number;

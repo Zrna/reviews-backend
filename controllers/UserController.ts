@@ -1,7 +1,9 @@
-const { User, Review } = require('../models');
-const { getUserIdFromRequest } = require('../utils/user');
+import { NextFunction, Request, Response } from 'express';
 
-const get_account = async (req, res, next) => {
+import { Review, User } from '../models';
+import { getUserIdFromRequest } from '../utils/user';
+
+const get_account = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = getUserIdFromRequest(req);
 
@@ -11,7 +13,11 @@ const get_account = async (req, res, next) => {
       },
     });
 
-    const { id, email, firstName, lastName, createdAt, updatedAt } = user.dataValues;
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const { id, email, firstName, lastName, createdAt, updatedAt } = user;
 
     return res.status(200).json({
       id,
@@ -26,23 +32,11 @@ const get_account = async (req, res, next) => {
   }
 };
 
-const update_account = async (req, res, next) => {
+const update_account = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = getUserIdFromRequest(req);
 
     const { firstName, lastName } = req.body;
-
-    await User.update(
-      {
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-      },
-      {
-        where: {
-          id: userId,
-        },
-      }
-    );
 
     const user = await User.findOne({
       where: {
@@ -50,7 +44,16 @@ const update_account = async (req, res, next) => {
       },
     });
 
-    const { id, email, firstName: updatedFirstName, lastName: updatedLastName, createdAt, updatedAt } = user.dataValues;
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    await user.update({
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+    });
+
+    const { id, email, firstName: updatedFirstName, lastName: updatedLastName, createdAt, updatedAt } = user;
 
     return res.status(200).json({
       id,
@@ -65,7 +68,7 @@ const update_account = async (req, res, next) => {
   }
 };
 
-const delete_account = async (req, res, next) => {
+const delete_account = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = getUserIdFromRequest(req);
 
@@ -87,8 +90,4 @@ const delete_account = async (req, res, next) => {
   }
 };
 
-module.exports = {
-  get_account,
-  update_account,
-  delete_account,
-};
+export { delete_account, get_account, update_account };

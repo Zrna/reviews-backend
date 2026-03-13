@@ -1,9 +1,10 @@
-const axios = require('axios');
+import axios from 'axios';
 
-const { Image } = require('../models');
-const { getBase64 } = require('../utils/image');
+import { Image } from '../models';
+import { ReviewAttributes } from '../types/models';
+import { getBase64 } from '../utils/image';
 
-const get_image_by_name_from_database = async name => {
+const get_image_by_name_from_database = async (name: ReviewAttributes['name']) => {
   try {
     const result = await Image.findOne({
       where: {
@@ -17,7 +18,7 @@ const get_image_by_name_from_database = async name => {
   }
 };
 
-const get_image_by_name_from_api = async name => {
+const get_image_by_name_from_api = async (name: ReviewAttributes['name']) => {
   try {
     console.log('Making image API request...');
     const response = await axios.get(`https://www.omdbapi.com/?apikey=${process.env.OMDB_API_KEY}&t=${name}`);
@@ -26,6 +27,10 @@ const get_image_by_name_from_api = async name => {
     // `imgUrl` can also be `N/A`
     if (imgUrl && imgUrl.startsWith('http')) {
       const base64Img = await getBase64(imgUrl);
+
+      if (!base64Img) {
+        return null;
+      }
 
       const result = await Image.create({
         name: name.toLowerCase(),
@@ -42,7 +47,4 @@ const get_image_by_name_from_api = async name => {
   }
 };
 
-module.exports = {
-  get_image_by_name_from_api,
-  get_image_by_name_from_database,
-};
+export { get_image_by_name_from_api, get_image_by_name_from_database };
