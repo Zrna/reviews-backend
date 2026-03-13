@@ -1,42 +1,43 @@
-require('dotenv').config();
+import dotenv from 'dotenv';
+dotenv.config();
 
-const { validateEnv } = require('./utils/validateEnv');
+import { validateEnv } from './utils/validateEnv';
 
 // Validate environment variables before starting the application
 validateEnv();
 
-const cookieParser = require('cookie-parser');
-const compression = require('compression');
-const cors = require('cors');
-const express = require('express');
-const fs = require('fs');
-const morgan = require('morgan');
-const swaggerUI = require('swagger-ui-express');
+import compression from 'compression';
+import cookieParser from 'cookie-parser';
+import cors from 'cors';
+import express, { NextFunction, Request, Response } from 'express';
+import fs from 'fs';
+import morgan from 'morgan';
+import swaggerUI from 'swagger-ui-express';
 
-const db = require('./models');
-const { errorHandler } = require('./middlewares/errorHandler');
-const { apiLimiter } = require('./middlewares/rateLimiter');
-const { requestId } = require('./middlewares/requestId');
-const statusRoutes = require('./routes/Status');
-const authRoutes = require('./routes/Auth');
-const userRoutes = require('./routes/User');
-const reviewRoutes = require('./routes/Review');
-const recommendationRoutes = require('./routes/Recommendation');
+import { errorHandler } from './middlewares/errorHandler';
+import { apiLimiter } from './middlewares/rateLimiter';
+import { requestId } from './middlewares/requestId';
+import { sequelize } from './models';
+import authRoutes from './routes/Auth';
+import recommendationRoutes from './routes/Recommendation';
+import reviewRoutes from './routes/Review';
+import statusRoutes from './routes/Status';
+import userRoutes from './routes/User';
 
 const PORT = process.env.PORT || 5001;
 const app = express();
 
-db.sequelize
+sequelize
   .authenticate()
   .then(() => console.log('Database connected'))
-  .catch(error => console.log('Database connection error:', error));
+  .catch((error: unknown) => console.log('Database connection error:', error));
 
 // Load auto-generated Swagger documentation
-let swaggerDocument;
+let swaggerDocument: Record<string, unknown> | null;
 try {
   swaggerDocument = JSON.parse(fs.readFileSync('./swagger-output.json', 'utf8'));
 } catch (error) {
-  console.warn('⚠️  Swagger documentation not found. Run: npm run swagger');
+  console.warn('⚠️ Warning: Swagger documentation not found. Run: npm run swagger');
   console.warn('   API docs will not be available at /api-docs');
   swaggerDocument = null;
 }
@@ -56,7 +57,7 @@ if (swaggerDocument) {
   );
 
   // Raw JSON spec at /api-docs/swagger.json for openapi-typescript
-  app.get('/api-docs/swagger.json', (req, res) => {
+  app.get('/api-docs/swagger.json', (_req: Request, res: Response) => {
     res.json(swaggerDocument);
   });
 }
@@ -66,8 +67,8 @@ app.use(requestId);
 
 // Add request logging - logs when request starts and completes
 // Define custom Morgan tokens
-morgan.token('id', req => req.id);
-morgan.token('userId', req => req.userId || 'anonymous');
+morgan.token('id', (req: Request) => req.id);
+morgan.token('userId', (req: Request) => String(req.userId || 'anonymous'));
 
 if (process.env.NODE_ENV === 'production') {
   app.use(
@@ -77,7 +78,7 @@ if (process.env.NODE_ENV === 'production') {
   );
 } else {
   // Log when request arrives (immediate)
-  app.use((req, res, next) => {
+  app.use((req: Request, _res: Response, next: NextFunction) => {
     console.log(`→ [${req.id}] ${req.method} ${req.url}`);
     next();
   });
@@ -109,7 +110,7 @@ app.use(userRoutes);
 app.use(reviewRoutes);
 app.use(recommendationRoutes);
 
-app.use('*', (req, res) => {
+app.use('*', (req: Request, res: Response) => {
   return res.status(404).send({
     error: 'Route Not Found',
     requestId: req.id,
@@ -119,7 +120,10 @@ app.use('*', (req, res) => {
 // Global error handler - must be last
 app.use(errorHandler);
 
-app.listen(PORT, error => {
-  if (error) return console.log(`Cannot listen on PORT: ${PORT}`);
+const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+});
+
+server.on('error', (error: NodeJS.ErrnoException) => {
+  console.log(`Cannot listen on PORT: ${PORT}`, error);
 });

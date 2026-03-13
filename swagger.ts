@@ -1,4 +1,7 @@
-const swaggerAutogen = require('swagger-autogen')({ openapi: '3.0.0' });
+import fs from 'fs';
+import swaggerAutogen from 'swagger-autogen';
+
+const swaggerAutogenInstance = swaggerAutogen({ openapi: '3.0.0' });
 
 const doc = {
   info: {
@@ -51,24 +54,40 @@ const doc = {
 };
 
 const outputFile = './swagger-output.json';
-const endpointsFiles = ['./index.js'];
+const endpointsFiles = ['./index.ts'];
 
-// Auto-tag routes based on path
-const options = {
-  autoHeaders: true,
-  autoQuery: true,
-  autoBody: true,
-};
+interface SwaggerEndpoint {
+  tags?: string[];
+  responses: Record<string, unknown>;
+}
 
-swaggerAutogen(outputFile, endpointsFiles, doc, options).then(({ success, data }) => {
+interface SwaggerData {
+  paths: Record<string, Record<string, SwaggerEndpoint>>;
+  components?: Record<string, unknown>;
+}
+
+interface RouteDefinition {
+  status: string;
+  description: string;
+  schema: Record<string, unknown>;
+  extra?: Record<string, unknown>;
+}
+
+swaggerAutogenInstance(outputFile, endpointsFiles, doc).then(result => {
+  if (!result) {
+    console.log('Generated: false');
+    return;
+  }
+
+  const { success, data } = result;
   console.log(`Generated: ${success}`);
+
   if (success) {
-    // Post-process to add tags and response schemas based on route paths
-    const fs = require('fs');
+    const swaggerData = data as unknown as SwaggerData;
 
     // Add schema definitions directly to avoid meta-processing
-    if (!data.components) data.components = {};
-    data.components.schemas = {
+    if (!swaggerData.components) swaggerData.components = {};
+    swaggerData.components.schemas = {
       User: {
         type: 'object',
         properties: {
@@ -265,7 +284,7 @@ swaggerAutogen(outputFile, endpointsFiles, doc, options).then(({ success, data }
     const errorRef = { $ref: '#/components/schemas/ErrorResponse' };
     const validationRef = { $ref: '#/components/schemas/ValidationErrorResponse' };
 
-    const errorResponse = description => ({
+    const errorResponse = (description: string) => ({
       description,
       content: { 'application/json': { schema: errorRef } },
     });
@@ -275,7 +294,7 @@ swaggerAutogen(outputFile, endpointsFiles, doc, options).then(({ success, data }
       content: { 'application/json': { schema: validationRef } },
     });
 
-    const jsonResponse = (description, schema) => ({
+    const jsonResponse = (description: string, schema: Record<string, unknown>) => ({
       description,
       content: { 'application/json': { schema } },
     });
@@ -283,19 +302,7 @@ swaggerAutogen(outputFile, endpointsFiles, doc, options).then(({ success, data }
     // Public routes that do not require bearer/cookie auth
     const PUBLIC_PATHS = new Set(['/register', '/login', '/logout', '/status']);
 
-    /**
-     * Automatically apply standard error responses based on HTTP method and path.
-     * Only fills in responses that are not already explicitly set.
-     *
-     * Convention:
-     *  - All protected routes         → 401 Unauthorized
-     *  - POST / PUT routes            → 400 Validation error
-     *  - Paths containing {param}     → 404 Not found
-     *  - POST routes                  → 409 Conflict (duplicate resource)
-     *  - Public routes get nothing    → handled in their specific blocks below
-     */
-    // eslint-disable-next-line no-inner-declarations
-    function applyDefaultResponses(path, method, endpoint) {
+    const applyDefaultResponses = (path: string, method: string, endpoint: SwaggerEndpoint): void => {
       const isPublic = PUBLIC_PATHS.has(path);
       const hasPathParam = path.includes('{');
 
@@ -315,16 +322,10 @@ swaggerAutogen(outputFile, endpointsFiles, doc, options).then(({ success, data }
       if (method === 'post' && !isPublic) {
         endpoint.responses['409'] = endpoint.responses['409'] || errorResponse('Resource already exists');
       }
-    }
+    };
 
     // ─── Route-specific success (2xx) response schemas ───────────────────────
-    // Only the success body needs to be defined per-route.
-    // All standard error responses (401, 400, 404, 409) are applied automatically
-    // by applyDefaultResponses() after this map is processed.
-    //
-    // To add responses for a NEW route, simply add an entry here:
-    //   'METHOD /path': { status, description, schema }
-    const ROUTE_SUCCESS = {
+    const ROUTE_SUCCESS: Record<string, RouteDefinition> = {
       'post /register': {
         status: '201',
         description: 'User created successfully',
@@ -439,9 +440,9 @@ swaggerAutogen(outputFile, endpointsFiles, doc, options).then(({ success, data }
     };
 
     // ─── Apply to all paths ───────────────────────────────────────────────────
-    for (const path in data.paths) {
-      for (const method in data.paths[path]) {
-        const endpoint = data.paths[path][method];
+    for (const path in swaggerData.paths) {
+      for (const method in swaggerData.paths[path]) {
+        const endpoint = swaggerData.paths[path][method];
 
         // Auto-assign tags based on path
         if (!endpoint.tags || endpoint.tags.length === 0) {
@@ -474,7 +475,7 @@ swaggerAutogen(outputFile, endpointsFiles, doc, options).then(({ success, data }
         applyDefaultResponses(path, method, endpoint);
       }
     }
-    fs.writeFileSync(outputFile, JSON.stringify(data, null, 2));
+    fs.writeFileSync(outputFile, JSON.stringify(swaggerData, null, 2));
     console.log('Swagger documentation generated successfully!');
     console.log('View at: http://localhost:5001/api-docs');
   }
