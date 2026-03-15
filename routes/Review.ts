@@ -54,4 +54,4 @@ router.put('/api/reviews/:id', updateReviewValidator, ReviewController.update_re
 // #swagger.security = [{ "cookieAuth": [] }, { "bearerAuth": [] }]
 router.delete('/api/reviews/:id', reviewIdValidator, ReviewController.delete_review_by_id);
 
-export = router;
+export default router;

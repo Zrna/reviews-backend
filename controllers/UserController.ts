@@ -28,7 +28,7 @@ const get_account = async (req: Request, res: Response, next: NextFunction) => {
       updatedAt,
     });
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
 
@@ -64,7 +64,7 @@ const update_account = async (req: Request, res: Response, next: NextFunction) =
       updatedAt,
     });
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
 
@@ -86,7 +86,7 @@ const delete_account = async (req: Request, res: Response, next: NextFunction) =
 
     return res.status(200).cookie('access-token', '', { maxAge: 1 }).json(true);
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
 

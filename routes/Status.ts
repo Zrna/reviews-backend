@@ -28,7 +28,7 @@ const startTime = Date.now();
       }
     }
 */
-router.get('/status', async (req: Request, res: Response) => {
+router.get('/status', async (_req: Request, res: Response) => {
   const uptime = Date.now() - startTime;
   const hours = Math.floor(uptime / (1000 * 60 * 60));
   const minutes = Math.floor((uptime % (1000 * 60 * 60)) / (1000 * 60));
@@ -64,4 +64,4 @@ router.get('/status', async (req: Request, res: Response) => {
   }
 });
 
-export = router;
+export default router;

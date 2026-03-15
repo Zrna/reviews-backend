@@ -43,7 +43,7 @@ const auth_register = async (req: Request, res: Response, next: NextFunction) =>
       message: 'User registered',
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -83,11 +83,11 @@ const auth_login = async (req: Request, res: Response, next: NextFunction) => {
 
     return res.status(200).json({ accessToken });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
-const auth_logout = async (req: Request, res: Response) => {
+const auth_logout = async (_req: Request, res: Response) => {
   res.clearCookie('access-token');
 
   return res.status(200).json('Logged out successfully');

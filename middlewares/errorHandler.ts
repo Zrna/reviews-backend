@@ -11,7 +11,7 @@ interface AppError extends Error {
  * Catches all errors and sends consistent error responses
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const errorHandler = (err: AppError, req: Request, res: Response, next: NextFunction) => {
+const errorHandler = (err: AppError, req: Request, res: Response, _next: NextFunction) => {
   // Log the error for debugging (include request ID and user ID for tracing)
   const userId = req.userId || 'anonymous';
   console.error(`errorHandler [${req.id || 'no-request-id'}] [user:${userId}] - Error:`, err);
@@ -71,7 +71,7 @@ const errorHandler = (err: AppError, req: Request, res: Response, next: NextFunc
   }
 
   // Default error response
-  res.status(statusCode).json({
+  return res.status(statusCode).json({
     error: process.env.NODE_ENV === 'production' && statusCode === 500 ? 'Internal Server Error' : message,
     requestId: req.id,
     ...(process.env.NODE_ENV !== 'production' && { stack: err.stack }),

@@ -21,4 +21,4 @@ router.use(validateToken);
 
 router.get('/api/recommendation', RecommendationController.get_recommendation);
 
-export = router;
+export default router;

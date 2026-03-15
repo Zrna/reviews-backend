@@ -10,7 +10,7 @@ interface Recommendation {
   genre: string[];
 }
 
-const get_recommendation = async (req: Request, res: Response, next: NextFunction) => {
+const get_recommendation = async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const randomIndex = Math.floor(Math.random() * recommendationsData.length);
     const recommendation = recommendationsData[randomIndex] as Recommendation;
@@ -22,7 +22,7 @@ const get_recommendation = async (req: Request, res: Response, next: NextFunctio
       img,
     });
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
 

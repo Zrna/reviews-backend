@@ -32,7 +32,7 @@ const get_all_reviews = async (req: Request, res: Response, next: NextFunction) 
       ...paginationMeta({ count, page, pageSize }),
     });
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
 
@@ -60,7 +60,7 @@ const get_latest_reviews = async (req: Request, res: Response, next: NextFunctio
       totalRecords: reviews.length,
     });
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
 
@@ -88,7 +88,7 @@ const get_reviews_grouped_by_ratings = async (req: Request, res: Response, next:
 
     return res.status(200).json(groupedReviews);
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
 
@@ -126,7 +126,7 @@ const get_reviews_by_rating = async (req: Request, res: Response, next: NextFunc
       ...paginationMeta({ count, page, pageSize }),
     });
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
 
@@ -169,7 +169,7 @@ const create_review = async (req: Request, res: Response, next: NextFunction) =>
 
     return res.status(201).json(newReview);
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
 
@@ -200,7 +200,7 @@ const get_review_by_id = async (req: Request, res: Response, next: NextFunction)
 
     return res.status(200).json(review);
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
 
@@ -254,7 +254,7 @@ const update_review_by_id = async (req: Request, res: Response, next: NextFuncti
 
     return res.status(200).json(updatedReview);
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
 
@@ -272,7 +272,7 @@ const delete_review_by_id = async (req: Request, res: Response, next: NextFuncti
 
     return res.status(200).json(true);
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
 

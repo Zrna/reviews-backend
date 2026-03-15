@@ -12,7 +12,7 @@ const handleValidationErrors = (req: Request, res: Response, next: NextFunction)
     });
   }
 
-  next();
+  return next();
 };
 
 // Auth validators

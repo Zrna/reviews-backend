@@ -282,7 +282,7 @@ Convert entry point last (all dependencies already typed). Key changes:
 
 ---
 
-## Phase 8 — Tighten Types & Clean Up
+## Phase 8 — Tighten Types & Clean Up ✅
 
 ### 8.1 Enable stricter tsconfig options
 
@@ -308,6 +308,8 @@ npx tsc --noEmit && npx lint-staged
 ### 8.6 Review notes
 
 - [ ] `process.env.TOKEN_SECRET!` non-null assertion in `utils/token.ts` — safe because `validateEnv()` checks at startup, but consider a stricter pattern (e.g. a typed config object)
+
+### 8.7 Change `export = ...` to `export default ...` where applicable, update imports accordingly.
 
 ---
 

@@ -21,4 +21,4 @@ router.post('/login', loginLimiter, loginValidator, AuthController.auth_login);
 // #swagger.description = 'Clears authentication token'
 router.post('/logout', AuthController.auth_logout);
 
-export = router;
+export default router;

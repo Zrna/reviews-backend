@@ -133,4 +133,4 @@ router.put('/api/account', updateAccountValidator, UserController.update_account
  */
 router.delete('/api/account', UserController.delete_account);
 
-export = router;
+export default router;
