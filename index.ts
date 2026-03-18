@@ -110,7 +110,7 @@ app.use(userRoutes);
 app.use(reviewRoutes);
 app.use(recommendationRoutes);
 
-app.use('*', (req: Request, res: Response) => {
+app.all('/{*any}', (req: Request, res: Response) => {
   return res.status(404).send({
     error: 'Route Not Found',
     requestId: req.id,
@@ -124,6 +124,7 @@ const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
+// eslint-disable-next-line no-undef
 server.on('error', (error: NodeJS.ErrnoException) => {
   console.log(`Cannot listen on PORT: ${PORT}`, error);
 });
