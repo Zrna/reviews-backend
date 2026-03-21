@@ -1,5 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 
+import { logger } from '../utils/logger';
+
 interface AppError extends Error {
   statusCode?: number;
   status?: number;
@@ -10,11 +12,11 @@ interface AppError extends Error {
  * Global error handler middleware
  * Catches all errors and sends consistent error responses
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 const errorHandler = (err: AppError, req: Request, res: Response, _next: NextFunction) => {
   // Log the error for debugging (include request ID and user ID for tracing)
   const userId = req.userId || 'anonymous';
-  console.error(`errorHandler [${req.id || 'no-request-id'}] [user:${userId}] - Error:`, err);
+  logger.error({ err, requestId: req.id, userId }, 'errorHandler - An error occurred');
 
   // Default error status and message
   const statusCode = err.statusCode || err.status || 500;

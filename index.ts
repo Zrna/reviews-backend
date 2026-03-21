@@ -9,9 +9,9 @@ validateEnv();
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import express, { NextFunction, Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 import fs from 'fs';
-import morgan from 'morgan';
+import pinoHttp from 'pino-http';
 import swaggerUI from 'swagger-ui-express';
 
 import { errorHandler } from './middlewares/errorHandler';
@@ -23,22 +23,23 @@ import recommendationRoutes from './routes/Recommendation';
 import reviewRoutes from './routes/Review';
 import statusRoutes from './routes/Status';
 import userRoutes from './routes/User';
+import { logger } from './utils/logger';
 
 const PORT = process.env.PORT || 5001;
 const app = express();
 
 sequelize
   .authenticate()
-  .then(() => console.log('Database connected'))
-  .catch((error: unknown) => console.log('Database connection error:', error));
+  .then(() => logger.info('Database connected'))
+  .catch((error: unknown) => logger.error(error, 'Database connection error'));
 
 // Load auto-generated Swagger documentation
 let swaggerDocument: Record<string, unknown> | null;
 try {
   swaggerDocument = JSON.parse(fs.readFileSync('./swagger-output.json', 'utf8'));
 } catch (error) {
-  console.warn('⚠️ Warning: Swagger documentation not found. Run: npm run swagger');
-  console.warn('   API docs will not be available at /api-docs');
+  logger.warn('Swagger documentation not found. Run: npm run swagger');
+  logger.warn('API docs will not be available at /api-docs');
   swaggerDocument = null;
 }
 
@@ -65,26 +66,23 @@ if (swaggerDocument) {
 // Assign a unique request ID to every incoming request
 app.use(requestId);
 
-// Add request logging - logs when request starts and completes
-// Define custom Morgan tokens
-morgan.token('id', (req: Request) => req.id);
-morgan.token('userId', (req: Request) => String(req.userId || 'anonymous'));
-
-if (process.env.NODE_ENV === 'production') {
-  app.use(
-    morgan(
-      ':id user::userId :remote-addr [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"'
-    )
-  );
-} else {
-  // Log when request arrives (immediate)
-  app.use((req: Request, _res: Response, next: NextFunction) => {
-    console.log(`→ [${req.id}] ${req.method} ${req.url}`);
-    next();
-  });
-  // Log when request completes (with timing and user ID)
-  app.use(morgan(':id user::userId :method :url :status :response-time ms'));
-}
+// HTTP request logging via pino-http
+app.use(
+  pinoHttp({
+    logger,
+    customLogLevel: (_req, res, err) => {
+      if (err || res.statusCode >= 500) return 'error';
+      if (res.statusCode >= 400) return 'warn';
+      return 'info';
+    },
+    customProps: (req: Request) => ({
+      requestId: req.id,
+      userId: req.userId || 'anonymous',
+    }),
+    customSuccessMessage: (req, res) => `${req.method} ${req.url} ${res.statusCode}`,
+    customErrorMessage: (req, res) => `${req.method} ${req.url} ${res.statusCode}`,
+  })
+);
 
 // Enable gzip compression for all responses
 app.use(compression());
@@ -121,10 +119,10 @@ app.all('/{*any}', (req: Request, res: Response) => {
 app.use(errorHandler);
 
 const server = app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  logger.info(`Server is running on port ${PORT}`);
 });
 
 // eslint-disable-next-line no-undef
 server.on('error', (error: NodeJS.ErrnoException) => {
-  console.log(`Cannot listen on PORT: ${PORT}`, error);
+  logger.error(error, `Cannot listen on PORT: ${PORT}`);
 });
