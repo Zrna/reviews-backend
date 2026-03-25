@@ -2,10 +2,11 @@ import axios from 'axios';
 
 import { Image } from '../models';
 import { ReviewAttributes } from '../types/models';
-import { getBase64 } from '../utils/image';
+import { logger } from '../utils/logger';
 
 const get_image_by_name_from_database = async (name: ReviewAttributes['name']) => {
   try {
+    logger.info(`Searching for image in database with name: ${name}`);
     const result = await Image.findOne({
       where: {
         name: name.toLowerCase(),
@@ -13,36 +14,45 @@ const get_image_by_name_from_database = async (name: ReviewAttributes['name']) =
     });
     return result;
   } catch (err) {
-    console.log('Can not get image from Image table', err);
+    logger.error(`Error fetching image from database for name: ${name}`);
+    console.error('Error:', err);
     return null;
   }
 };
 
 const get_image_by_name_from_api = async (name: ReviewAttributes['name']) => {
   try {
-    console.log('Making image API request...');
-    const response = await axios.get(`https://www.omdbapi.com/?apikey=${process.env.OMDB_API_KEY}&t=${name}`);
-    const imgUrl = response.data.Poster;
+    logger.info(`Fetching image from TMDB API for name: ${name}`);
+    const response = await axios.get('https://api.themoviedb.org/3/search/multi', {
+      params: {
+        query: name,
+      },
+      headers: {
+        Authorization: `Bearer ${process.env.TMDB_ACCESS_TOKEN}`,
+      },
+    });
 
-    // `imgUrl` can also be `N/A`
-    if (imgUrl && imgUrl.startsWith('http')) {
-      const base64Img = await getBase64(imgUrl);
-
-      if (!base64Img) {
-        return null;
-      }
-
-      const result = await Image.create({
-        name: name.toLowerCase(),
-        img: base64Img,
-      });
-
-      return result;
+    const firstResult = response.data.results?.[0];
+    if (!firstResult) {
+      logger.warn(`No results found in TMDB API for name: ${name}`);
+      return null;
     }
 
-    return null;
+    const imagePath = firstResult.backdrop_path || firstResult.poster_path;
+    if (!imagePath) {
+      logger.warn(`No image found in TMDB API for name: ${name}`);
+      return null;
+    }
+
+    const result = await Image.create({
+      name: name.toLowerCase(),
+      img: `https://image.tmdb.org/t/p/original${imagePath}`,
+    });
+
+    return result;
   } catch (err) {
-    console.log('Can not get image from API', err);
+    logger.error(`Error fetching image from TMDB API for name: ${name}`);
+    console.error('Error:', err);
     return null;
   }
 };

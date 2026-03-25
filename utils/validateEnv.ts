@@ -13,7 +13,7 @@ export const validateEnv = (): void => {
     'NODE_ENV',
     'PORT',
     'TOKEN_SECRET',
-    'OMDB_API_KEY',
+    'TMDB_ACCESS_TOKEN',
   ];
 
   const missingVars = requiredEnvVars.filter(varName => !(varName in process.env));
