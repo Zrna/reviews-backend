@@ -1,7 +1,7 @@
 import path from 'path';
 import { Sequelize } from 'sequelize';
 
-import Image from './Image';
+import Media from './Media';
 import Review from './Review';
 import User from './User';
 
@@ -13,10 +13,10 @@ const sequelize = new Sequelize(config.database, config.username, config.passwor
 
 User.initModel(sequelize);
 Review.initModel(sequelize);
-Image.initModel(sequelize);
+Media.initModel(sequelize);
 
 User.associate({ Review });
-Review.associate({ User, Image });
-Image.associate({ Review });
+Review.associate({ User, Media });
+Media.associate({ Review });
 
-export { Image, Review, Sequelize, sequelize, User };
+export { Media, Review, Sequelize, sequelize, User };

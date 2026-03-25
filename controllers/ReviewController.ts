@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
 
-import { Image, Review } from '../models';
+import { Media, Review } from '../models';
 import { DEFAULT_PAGINATION, paginationMeta } from '../utils/pagination';
 import { getPlatformOrMediaUrl } from '../utils/platforms';
 import { getUserIdFromRequest } from '../utils/user';
-import * as ImageController from './ImageController';
+import * as MediaController from './MediaController';
 
 const get_all_reviews = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -20,8 +20,8 @@ const get_all_reviews = async (req: Request, res: Response, next: NextFunction) 
       offset,
       include: [
         {
-          model: Image,
-          as: 'image',
+          model: Media,
+          as: 'media',
           attributes: ['img'],
         },
       ],
@@ -48,8 +48,8 @@ const get_latest_reviews = async (req: Request, res: Response, next: NextFunctio
       limit: 5,
       include: [
         {
-          model: Image,
-          as: 'image',
+          model: Media,
+          as: 'media',
           attributes: ['img'],
         },
       ],
@@ -75,7 +75,13 @@ const get_reviews_grouped_by_ratings = async (req: Request, res: Response, next:
           where: { userId, rating: ratingValue },
           limit: 10,
           order: [['updatedAt', 'DESC']],
-          include: [{ model: Image, as: 'image', attributes: ['img'] }],
+          include: [
+            {
+              model: Media,
+              as: 'media',
+              attributes: ['img'],
+            },
+          ],
         });
 
         return {
@@ -117,7 +123,13 @@ const get_reviews_by_rating = async (req: Request, res: Response, next: NextFunc
       limit: pageSize,
       offset,
       order: [['updatedAt', 'DESC']],
-      include: [{ model: Image, as: 'image', attributes: ['img'] }],
+      include: [
+        {
+          model: Media,
+          as: 'media',
+          attributes: ['img'],
+        },
+      ],
     });
 
     return res.status(200).json({
@@ -149,12 +161,12 @@ const create_review = async (req: Request, res: Response, next: NextFunction) =>
       });
     }
 
-    const dbImg = await ImageController.get_image_by_name_from_database(name.trim().toLowerCase());
-    let imageId = dbImg ? dbImg.id : null;
+    const dbMedia = await MediaController.get_media_by_name_from_database(name.trim().toLowerCase());
+    let mediaId = dbMedia ? dbMedia.id : null;
 
-    if (!imageId) {
-      const newDbImage = await ImageController.get_image_by_name_from_api(name.trim());
-      imageId = newDbImage ? newDbImage.id : null;
+    if (!mediaId) {
+      const newDbMedia = await MediaController.get_media_by_name_from_api(name.trim());
+      mediaId = newDbMedia ? newDbMedia.id : null;
     }
 
     const newReview = await Review.create({
@@ -164,7 +176,7 @@ const create_review = async (req: Request, res: Response, next: NextFunction) =>
       url: url ? getPlatformOrMediaUrl(url.trim()) : null,
       userId,
       watchAgain: watchAgain ?? false,
-      imageId,
+      mediaId,
     });
 
     return res.status(201).json(newReview);
@@ -185,8 +197,8 @@ const get_review_by_id = async (req: Request, res: Response, next: NextFunction)
       },
       include: [
         {
-          model: Image,
-          as: 'image',
+          model: Media,
+          as: 'media',
           attributes: ['img'],
         },
       ],
@@ -245,8 +257,8 @@ const update_review_by_id = async (req: Request, res: Response, next: NextFuncti
       },
       include: [
         {
-          model: Image,
-          as: 'image',
+          model: Media,
+          as: 'media',
           attributes: ['img'],
         },
       ],

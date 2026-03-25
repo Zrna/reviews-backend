@@ -15,7 +15,7 @@ export type UserCreationAttributes = Optional<UserAttributes, 'id' | 'createdAt'
 export interface ReviewAttributes {
   id: number;
   userId: number;
-  imageId: number | null;
+  mediaId: number | null;
   name: string;
   review: string;
   rating: number | null;
@@ -27,10 +27,10 @@ export interface ReviewAttributes {
 
 export type ReviewCreationAttributes = Optional<
   ReviewAttributes,
-  'id' | 'imageId' | 'rating' | 'url' | 'watchAgain' | 'createdAt' | 'updatedAt'
+  'id' | 'mediaId' | 'rating' | 'url' | 'watchAgain' | 'createdAt' | 'updatedAt'
 >;
 
-export interface ImageAttributes {
+export interface MediaAttributes {
   id: number;
   name: string;
   img: string;
@@ -38,4 +38,4 @@ export interface ImageAttributes {
   updatedAt: Date;
 }
 
-export type ImageCreationAttributes = Optional<ImageAttributes, 'id' | 'createdAt' | 'updatedAt'>;
+export type MediaCreationAttributes = Optional<MediaAttributes, 'id' | 'createdAt' | 'updatedAt'>;

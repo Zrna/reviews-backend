@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 
 import recommendationsData from '../data/recommendations.json';
-import * as ImageController from './ImageController';
+import * as MediaController from './MediaController';
 
 interface Recommendation {
   id: number;
@@ -15,7 +15,7 @@ const get_recommendation = async (_req: Request, res: Response, next: NextFuncti
     const randomIndex = Math.floor(Math.random() * recommendationsData.length);
     const recommendation = recommendationsData[randomIndex] as Recommendation;
 
-    const img = await ImageController.get_image_by_name_from_database(String(recommendation.name).toLowerCase());
+    const img = await MediaController.get_media_by_name_from_database(String(recommendation.name).toLowerCase());
 
     return res.status(200).json({
       ...recommendation,

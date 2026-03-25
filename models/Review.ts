@@ -5,7 +5,7 @@ import { ReviewAttributes, ReviewCreationAttributes } from '../types/models';
 class Review extends Model<ReviewAttributes, ReviewCreationAttributes> implements ReviewAttributes {
   declare id: number;
   declare userId: number;
-  declare imageId: number | null;
+  declare mediaId: number | null;
   declare name: string;
   declare review: string;
   declare rating: number | null;
@@ -19,10 +19,10 @@ class Review extends Model<ReviewAttributes, ReviewCreationAttributes> implement
       foreignKey: 'userId',
       as: 'user',
     });
-    Review.belongsTo(models.Image, {
-      foreignKey: 'imageId',
+    Review.belongsTo(models.Media, {
+      foreignKey: 'mediaId',
       targetKey: 'id',
-      as: 'image',
+      as: 'media',
     });
   }
 
@@ -45,11 +45,11 @@ class Review extends Model<ReviewAttributes, ReviewCreationAttributes> implement
           onUpdate: 'CASCADE',
           onDelete: 'CASCADE',
         },
-        imageId: {
+        mediaId: {
           type: DataTypes.INTEGER,
           allowNull: true,
           references: {
-            model: 'images', // name of the target table
+            model: 'media', // name of the target table
             key: 'id', // key in the target table that we're referencing
           },
           onUpdate: 'CASCADE',

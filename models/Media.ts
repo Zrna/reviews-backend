@@ -1,8 +1,8 @@
 import { DataTypes, Model, ModelStatic, Sequelize } from 'sequelize';
 
-import { ImageAttributes, ImageCreationAttributes } from '../types/models';
+import { MediaAttributes, MediaCreationAttributes } from '../types/models';
 
-class Image extends Model<ImageAttributes, ImageCreationAttributes> implements ImageAttributes {
+class Media extends Model<MediaAttributes, MediaCreationAttributes> implements MediaAttributes {
   declare id: number;
   declare name: string;
   declare img: string;
@@ -10,15 +10,15 @@ class Image extends Model<ImageAttributes, ImageCreationAttributes> implements I
   declare updatedAt: Date;
 
   static associate(models: Record<string, ModelStatic<Model>>): void {
-    Image.hasMany(models.Review, {
-      foreignKey: 'imageId',
+    Media.hasMany(models.Review, {
+      foreignKey: 'mediaId',
       sourceKey: 'id',
       as: 'reviews',
     });
   }
 
-  static initModel(sequelize: Sequelize): typeof Image {
-    Image.init(
+  static initModel(sequelize: Sequelize): typeof Media {
+    Media.init(
       {
         id: {
           type: DataTypes.INTEGER,
@@ -38,13 +38,13 @@ class Image extends Model<ImageAttributes, ImageCreationAttributes> implements I
       },
       {
         sequelize,
-        modelName: 'Image',
+        modelName: 'Media',
         indexes: [{ fields: ['name'] }],
       }
     );
 
-    return Image;
+    return Media;
   }
 }
 
-export default Image;
+export default Media;

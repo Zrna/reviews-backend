@@ -28,7 +28,7 @@ const doc = {
     },
     {
       name: 'Recommendations',
-      description: 'Get recommendations from OMDB',
+      description: 'Get recommendations from TMDB',
     },
     {
       name: 'Status',
@@ -104,7 +104,7 @@ swaggerAutogenInstance(outputFile, endpointsFiles, doc).then(result => {
         properties: {
           id: { type: 'integer', example: 1 },
           userId: { type: 'integer', example: 1 },
-          imageId: { type: 'integer', example: 1, nullable: true },
+          mediaId: { type: 'integer', example: 1, nullable: true },
           name: { type: 'string', example: 'Breaking Bad' },
           review: { type: 'string', example: 'Amazing series!' },
           rating: { type: 'integer', example: 5, nullable: true },
@@ -112,11 +112,11 @@ swaggerAutogenInstance(outputFile, endpointsFiles, doc).then(result => {
           watchAgain: { type: 'boolean', example: true },
           createdAt: { type: 'string', example: '2024-01-01T00:00:00.000Z' },
           updatedAt: { type: 'string', example: '2024-01-01T00:00:00.000Z' },
-          image: {
+          media: {
             type: 'object',
             nullable: true,
             properties: {
-              img: { type: 'string', example: 'data:image/jpeg;base64,...' },
+              img: { type: 'string', example: 'https://image.tmdb.org/t/p/original/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg' },
             },
           },
         },
@@ -241,7 +241,9 @@ swaggerAutogenInstance(outputFile, endpointsFiles, doc).then(result => {
           img: {
             type: 'object',
             nullable: true,
-            properties: { img: { type: 'string', example: 'data:image/jpeg;base64,...' } },
+            properties: {
+              img: { type: 'string', example: 'https://image.tmdb.org/t/p/original/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg' },
+            },
           },
         },
       },
