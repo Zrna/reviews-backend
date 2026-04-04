@@ -66,24 +66,6 @@ if (swaggerDocument) {
 // Assign a unique request ID to every incoming request
 app.use(requestId);
 
-// HTTP request logging via pino-http
-app.use(
-  pinoHttp({
-    logger,
-    customLogLevel: (_req, res, err) => {
-      if (err || res.statusCode >= 500) return 'error';
-      if (res.statusCode >= 400) return 'warn';
-      return 'info';
-    },
-    customProps: (req: Request) => ({
-      requestId: req.id,
-      userId: req.userId || 'anonymous',
-    }),
-    customSuccessMessage: (req, res) => `${req.method} ${req.url} ${res.statusCode}`,
-    customErrorMessage: (req, res) => `${req.method} ${req.url} ${res.statusCode}`,
-  })
-);
-
 // Enable gzip compression for all responses
 app.use(compression());
 
@@ -96,6 +78,30 @@ app.use(
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// HTTP request logging via pino-http (after body parsers so req.body is available)
+app.use(
+  pinoHttp({
+    logger,
+    customLogLevel: (_req, res, err) => {
+      if (err || res.statusCode >= 500) return 'error';
+      if (res.statusCode >= 400) return 'warn';
+      return 'info';
+    },
+    customProps: (req: Request) => ({
+      requestId: req.id,
+      userId: req.userId || 'anonymous',
+    }),
+    serializers: {
+      req(req) {
+        req.body = req.raw.body;
+        return req;
+      },
+    },
+    customSuccessMessage: (req, res) => `${req.method} ${req.url} ${res.statusCode}`,
+    customErrorMessage: (req, res) => `${req.method} ${req.url} ${res.statusCode}`,
+  })
+);
 
 // Apply rate limiting to all routes
 app.use(apiLimiter);
