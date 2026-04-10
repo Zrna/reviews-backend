@@ -106,6 +106,7 @@ swaggerAutogenInstance(outputFile, endpointsFiles, doc).then(result => {
           userId: { type: 'integer', example: 1 },
           mediaId: { type: 'integer', example: 1, nullable: true },
           name: { type: 'string', example: 'Breaking Bad' },
+          type: { type: 'string', enum: ['movie', 'tv', 'podcast', 'youtube', 'other'], example: 'tv' },
           review: { type: 'string', example: 'Amazing series!' },
           rating: { type: 'integer', example: 5, nullable: true },
           url: { type: 'string', example: 'https://www.imdb.com/title/tt0903747/', nullable: true },
@@ -117,16 +118,22 @@ swaggerAutogenInstance(outputFile, endpointsFiles, doc).then(result => {
             nullable: true,
             properties: {
               img: { type: 'string', example: 'https://image.tmdb.org/t/p/original/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg' },
+              type: { type: 'string', example: 'tv' },
             },
           },
         },
       },
       ReviewInput: {
         type: 'object',
-        required: ['name', 'review'],
+        required: ['name', 'review', 'mediaType'],
         properties: {
           name: { type: 'string', example: 'Breaking Bad' },
           review: { type: 'string', example: 'Amazing series!' },
+          mediaType: {
+            type: 'string',
+            enum: ['movie', 'tv', 'podcast', 'youtube', 'other'],
+            example: 'tv',
+          },
           rating: { type: 'integer', example: 5, minimum: 1, maximum: 5 },
           url: { type: 'string', example: 'https://www.imdb.com/title/tt0903747/' },
           watchAgain: { type: 'boolean', example: true },

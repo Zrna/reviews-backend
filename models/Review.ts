@@ -7,6 +7,7 @@ class Review extends Model<ReviewAttributes, ReviewCreationAttributes> implement
   declare userId: number;
   declare mediaId: number | null;
   declare name: string;
+  declare type: ReviewAttributes['type'];
   declare review: string;
   declare rating: number | null;
   declare url: string | null;
@@ -56,6 +57,10 @@ class Review extends Model<ReviewAttributes, ReviewCreationAttributes> implement
           onDelete: 'SET NULL',
         },
         name: {
+          type: DataTypes.STRING,
+          allowNull: false,
+        },
+        type: {
           type: DataTypes.STRING,
           allowNull: false,
         },

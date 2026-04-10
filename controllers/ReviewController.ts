@@ -22,7 +22,7 @@ const get_all_reviews = async (req: Request, res: Response, next: NextFunction) 
         {
           model: Media,
           as: 'media',
-          attributes: ['img'],
+          attributes: ['img', 'type'],
         },
       ],
     });
@@ -50,7 +50,7 @@ const get_latest_reviews = async (req: Request, res: Response, next: NextFunctio
         {
           model: Media,
           as: 'media',
-          attributes: ['img'],
+          attributes: ['img', 'type'],
         },
       ],
     });
@@ -79,7 +79,7 @@ const get_reviews_grouped_by_ratings = async (req: Request, res: Response, next:
             {
               model: Media,
               as: 'media',
-              attributes: ['img'],
+              attributes: ['img', 'type'],
             },
           ],
         });
@@ -127,7 +127,7 @@ const get_reviews_by_rating = async (req: Request, res: Response, next: NextFunc
         {
           model: Media,
           as: 'media',
-          attributes: ['img'],
+          attributes: ['img', 'type'],
         },
       ],
     });
@@ -146,31 +146,37 @@ const create_review = async (req: Request, res: Response, next: NextFunction) =>
   try {
     const userId = getUserIdFromRequest(req);
 
-    const { name, review, rating, url, watchAgain } = req.body;
+    const { name, review, rating, url, watchAgain, mediaType } = req.body;
 
     const reviewExist = await Review.findOne({
       where: {
         userId,
         name: name.trim(),
+        type: mediaType,
       },
     });
 
     if (reviewExist) {
       return res.status(409).json({
-        error: `Review for '${name.trim()}' already exists`,
+        error: `Review for '${name.trim()}' (${mediaType}) already exists`,
+        reviewId: reviewExist.id,
       });
     }
 
-    const dbMedia = await MediaController.get_media_by_name_from_database(name.trim().toLowerCase());
-    let mediaId = dbMedia ? dbMedia.id : null;
+    let mediaId = null;
 
-    if (!mediaId) {
-      const newDbMedia = await MediaController.get_media_by_name_from_api(name.trim());
+    const dbMedia = await MediaController.get_media_by_name_from_database(name.trim().toLowerCase(), mediaType);
+
+    mediaId = dbMedia ? dbMedia.id : null;
+
+    if (!mediaId && (mediaType === 'movie' || mediaType === 'tv')) {
+      const newDbMedia = await MediaController.get_media_by_name_from_api(name.trim(), mediaType);
       mediaId = newDbMedia ? newDbMedia.id : null;
     }
 
     const newReview = await Review.create({
       name: name.trim(),
+      type: mediaType,
       rating: rating || null,
       review: review.trim(),
       url: url ? getPlatformOrMediaUrl(url.trim()) : null,
@@ -199,7 +205,7 @@ const get_review_by_id = async (req: Request, res: Response, next: NextFunction)
         {
           model: Media,
           as: 'media',
-          attributes: ['img'],
+          attributes: ['img', 'type'],
         },
       ],
     });
@@ -259,7 +265,7 @@ const update_review_by_id = async (req: Request, res: Response, next: NextFuncti
         {
           model: Media,
           as: 'media',
-          attributes: ['img'],
+          attributes: ['img', 'type'],
         },
       ],
     });

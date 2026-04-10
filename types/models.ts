@@ -12,11 +12,14 @@ export interface UserAttributes {
 
 export type UserCreationAttributes = Optional<UserAttributes, 'id' | 'createdAt' | 'updatedAt'>;
 
+export type ReviewType = 'movie' | 'tv' | 'podcast' | 'youtube' | 'other';
+
 export interface ReviewAttributes {
   id: number;
   userId: number;
   mediaId: number | null;
   name: string;
+  type: ReviewType;
   review: string;
   rating: number | null;
   url: string | null;
@@ -34,6 +37,7 @@ export interface MediaAttributes {
   id: number;
   name: string;
   img: string;
+  type: string;
   createdAt: Date;
   updatedAt: Date;
 }

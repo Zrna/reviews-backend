@@ -57,6 +57,11 @@ const updateAccountValidator = [
 const createReviewValidator = [
   body('name').trim().notEmpty().withMessage("Name can't be empty"),
   body('review').trim().notEmpty().withMessage("Review can't be empty"),
+  body('mediaType')
+    .notEmpty()
+    .withMessage("Media type can't be empty")
+    .isIn(['movie', 'tv', 'podcast', 'youtube', 'other'])
+    .withMessage('Media type must be one of: movie, tv, podcast, youtube, other'),
   body('url').optional({ checkFalsy: true }).trim(),
   body('rating').optional({ checkFalsy: true }).isInt({ min: 1, max: 5 }).withMessage('Rating must be between 1 and 5'),
   body('watchAgain').optional({ checkFalsy: true }).isBoolean().withMessage('Watch again must be a boolean'),

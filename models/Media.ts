@@ -6,6 +6,7 @@ class Media extends Model<MediaAttributes, MediaCreationAttributes> implements M
   declare id: number;
   declare name: string;
   declare img: string;
+  declare type: string;
   declare createdAt: Date;
   declare updatedAt: Date;
 
@@ -31,6 +32,10 @@ class Media extends Model<MediaAttributes, MediaCreationAttributes> implements M
         },
         img: {
           type: DataTypes.TEXT({ length: 'long' }),
+          allowNull: false,
+        },
+        type: {
+          type: DataTypes.STRING,
           allowNull: false,
         },
         createdAt: DataTypes.DATE,
