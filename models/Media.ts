@@ -16,6 +16,12 @@ class Media extends Model<MediaAttributes, MediaCreationAttributes> implements M
       sourceKey: 'id',
       as: 'reviews',
     });
+    Media.belongsToMany(models.Genre, {
+      through: models.MediaGenre,
+      foreignKey: 'mediaId',
+      otherKey: 'genreId',
+      as: 'genres',
+    });
   }
 
   static initModel(sequelize: Sequelize): typeof Media {

@@ -23,6 +23,7 @@ import recommendationRoutes from './routes/Recommendation';
 import reviewRoutes from './routes/Review';
 import statusRoutes from './routes/Status';
 import userRoutes from './routes/User';
+import { syncGenresFromTMDB } from './utils/genreSync';
 import { logger } from './utils/logger';
 
 const PORT = process.env.PORT || 5001;
@@ -30,7 +31,10 @@ const app = express();
 
 sequelize
   .authenticate()
-  .then(() => logger.info('Database connected'))
+  .then(() => {
+    logger.info('Database connected');
+    return syncGenresFromTMDB();
+  })
   .catch((error: unknown) => logger.error(error, 'Database connection error'));
 
 // Load auto-generated Swagger documentation

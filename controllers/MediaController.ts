@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-import { Media } from '../models';
-import { ReviewAttributes } from '../types/models';
+import { Genre, Media, MediaGenre } from '../models';
+import { GenreMediaType, ReviewAttributes } from '../types/models';
 import { logger } from '../utils/logger';
 
 const get_media_by_name_from_database = async (name: ReviewAttributes['name'], type?: string) => {
@@ -25,6 +25,51 @@ const TMDB_API_SEARCH_ENDPOINTS = {
   movie: 'search/movie',
   tv: 'search/tv',
   multi: 'search/multi',
+};
+
+interface LinkGenresToMediaParams {
+  mediaId: number;
+  genreIds: number[] | undefined;
+  mediaType: GenreMediaType;
+}
+
+const linkGenresToMedia = async ({ mediaId, genreIds, mediaType }: LinkGenresToMediaParams) => {
+  try {
+    if (!genreIds || genreIds.length === 0) {
+      logger.warn(`No genre_ids returned from TMDB for mediaId=${mediaId} (${mediaType}) — skipping genre linking`);
+      return;
+    }
+
+    const genres = await Genre.findAll({
+      where: {
+        tmdbId: genreIds,
+        mediaType,
+      },
+    });
+
+    const foundTmdbIds = new Set(genres.map(g => g.tmdbId));
+    const missing = genreIds.filter(id => !foundTmdbIds.has(id));
+
+    if (missing.length > 0) {
+      logger.warn(`Unknown TMDB genre IDs for mediaId=${mediaId} (${mediaType}): ${missing.join(', ')}`);
+    }
+
+    if (genres.length === 0) {
+      return;
+    }
+
+    await MediaGenre.bulkCreate(
+      genres.map(genre => ({
+        mediaId,
+        genreId: genre.id,
+      })),
+      {
+        ignoreDuplicates: true,
+      }
+    );
+  } catch (err) {
+    logger.error(err, `Failed to link genres for mediaId=${mediaId}`);
+  }
 };
 
 const get_media_by_name_from_api = async (name: ReviewAttributes['name'], type: string) => {
@@ -69,6 +114,14 @@ const get_media_by_name_from_api = async (name: ReviewAttributes['name'], type: 
       img: `https://image.tmdb.org/t/p/original${imagePath}`,
       type: mediaType,
     });
+
+    if (mediaType === 'movie' || mediaType === 'tv') {
+      await linkGenresToMedia({
+        mediaId: result.id,
+        genreIds: firstResult.genre_ids,
+        mediaType,
+      });
+    }
 
     return result;
   } catch (err) {

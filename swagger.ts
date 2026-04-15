@@ -119,8 +119,19 @@ swaggerAutogenInstance(outputFile, endpointsFiles, doc).then(result => {
             properties: {
               img: { type: 'string', example: 'https://image.tmdb.org/t/p/original/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg' },
               type: { type: 'string', example: 'tv' },
+              genres: {
+                type: 'array',
+                items: { $ref: '#/components/schemas/Genre' },
+              },
             },
           },
+        },
+      },
+      Genre: {
+        type: 'object',
+        properties: {
+          id: { type: 'integer', example: 1 },
+          name: { type: 'string', example: 'Drama' },
         },
       },
       ReviewInput: {

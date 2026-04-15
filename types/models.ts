@@ -43,3 +43,26 @@ export interface MediaAttributes {
 }
 
 export type MediaCreationAttributes = Optional<MediaAttributes, 'id' | 'createdAt' | 'updatedAt'>;
+
+export type GenreMediaType = 'movie' | 'tv' | 'podcast';
+
+export interface GenreAttributes {
+  id: number;
+  tmdbId: number | null;
+  mediaType: GenreMediaType;
+  name: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type GenreCreationAttributes = Optional<GenreAttributes, 'id' | 'tmdbId' | 'createdAt' | 'updatedAt'>;
+
+export interface MediaGenreAttributes {
+  id: number;
+  mediaId: number;
+  genreId: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type MediaGenreCreationAttributes = Optional<MediaGenreAttributes, 'id' | 'createdAt' | 'updatedAt'>;

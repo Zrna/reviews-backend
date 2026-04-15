@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 
-import { Media, Review } from '../models';
+import { Genre, Media, Review } from '../models';
 import { DEFAULT_PAGINATION, paginationMeta } from '../utils/pagination';
 import { getPlatformOrMediaUrl } from '../utils/platforms';
 import { getUserIdFromRequest } from '../utils/user';
@@ -23,6 +23,14 @@ const get_all_reviews = async (req: Request, res: Response, next: NextFunction) 
           model: Media,
           as: 'media',
           attributes: ['img', 'type'],
+          include: [
+            {
+              model: Genre,
+              as: 'genres',
+              attributes: ['id', 'name'],
+              through: { attributes: [] },
+            },
+          ],
         },
       ],
     });
@@ -206,6 +214,14 @@ const get_review_by_id = async (req: Request, res: Response, next: NextFunction)
           model: Media,
           as: 'media',
           attributes: ['img', 'type'],
+          include: [
+            {
+              model: Genre,
+              as: 'genres',
+              attributes: ['id', 'name'],
+              through: { attributes: [] },
+            },
+          ],
         },
       ],
     });
@@ -266,6 +282,14 @@ const update_review_by_id = async (req: Request, res: Response, next: NextFuncti
           model: Media,
           as: 'media',
           attributes: ['img', 'type'],
+          include: [
+            {
+              model: Genre,
+              as: 'genres',
+              attributes: ['id', 'tmdbId', 'name', 'mediaType'],
+              through: { attributes: [] },
+            },
+          ],
         },
       ],
     });
