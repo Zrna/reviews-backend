@@ -38,11 +38,16 @@ export interface MediaAttributes {
   name: string;
   img: string;
   type: string;
+  overview: string | null;
+  releaseDate: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export type MediaCreationAttributes = Optional<MediaAttributes, 'id' | 'createdAt' | 'updatedAt'>;
+export type MediaCreationAttributes = Optional<
+  MediaAttributes,
+  'id' | 'overview' | 'releaseDate' | 'createdAt' | 'updatedAt'
+>;
 
 export type GenreMediaType = 'movie' | 'tv' | 'podcast';
 

@@ -7,6 +7,8 @@ class Media extends Model<MediaAttributes, MediaCreationAttributes> implements M
   declare name: string;
   declare img: string;
   declare type: string;
+  declare overview: string | null;
+  declare releaseDate: string | null;
   declare createdAt: Date;
   declare updatedAt: Date;
 
@@ -43,6 +45,14 @@ class Media extends Model<MediaAttributes, MediaCreationAttributes> implements M
         type: {
           type: DataTypes.STRING,
           allowNull: false,
+        },
+        overview: {
+          type: DataTypes.TEXT,
+          allowNull: true,
+        },
+        releaseDate: {
+          type: DataTypes.STRING,
+          allowNull: true,
         },
         createdAt: DataTypes.DATE,
         updatedAt: DataTypes.DATE,

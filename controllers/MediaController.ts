@@ -113,6 +113,8 @@ const get_media_by_name_from_api = async (name: ReviewAttributes['name'], type: 
       name: name.toLowerCase(),
       img: `https://image.tmdb.org/t/p/original${imagePath}`,
       type: mediaType,
+      overview: firstResult.overview || null,
+      releaseDate: firstResult.release_date || firstResult.first_air_date || null,
     });
 
     if (mediaType === 'movie' || mediaType === 'tv') {

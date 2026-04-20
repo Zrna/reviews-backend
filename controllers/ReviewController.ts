@@ -22,7 +22,7 @@ const get_all_reviews = async (req: Request, res: Response, next: NextFunction) 
         {
           model: Media,
           as: 'media',
-          attributes: ['img', 'type'],
+          attributes: ['img', 'type', 'overview', 'releaseDate'],
           include: [
             {
               model: Genre,
@@ -58,7 +58,7 @@ const get_latest_reviews = async (req: Request, res: Response, next: NextFunctio
         {
           model: Media,
           as: 'media',
-          attributes: ['img', 'type'],
+          attributes: ['img', 'type', 'overview', 'releaseDate'],
         },
       ],
     });
@@ -87,7 +87,7 @@ const get_reviews_grouped_by_ratings = async (req: Request, res: Response, next:
             {
               model: Media,
               as: 'media',
-              attributes: ['img', 'type'],
+              attributes: ['img', 'type', 'overview', 'releaseDate'],
             },
           ],
         });
@@ -135,7 +135,7 @@ const get_reviews_by_rating = async (req: Request, res: Response, next: NextFunc
         {
           model: Media,
           as: 'media',
-          attributes: ['img', 'type'],
+          attributes: ['img', 'type', 'overview', 'releaseDate'],
         },
       ],
     });
@@ -213,7 +213,7 @@ const get_review_by_id = async (req: Request, res: Response, next: NextFunction)
         {
           model: Media,
           as: 'media',
-          attributes: ['img', 'type'],
+          attributes: ['img', 'type', 'overview', 'releaseDate'],
           include: [
             {
               model: Genre,
@@ -281,7 +281,7 @@ const update_review_by_id = async (req: Request, res: Response, next: NextFuncti
         {
           model: Media,
           as: 'media',
-          attributes: ['img', 'type'],
+          attributes: ['img', 'type', 'overview', 'releaseDate'],
           include: [
             {
               model: Genre,

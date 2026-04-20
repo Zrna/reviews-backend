@@ -119,6 +119,13 @@ swaggerAutogenInstance(outputFile, endpointsFiles, doc).then(result => {
             properties: {
               img: { type: 'string', example: 'https://image.tmdb.org/t/p/original/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg' },
               type: { type: 'string', example: 'tv' },
+              overview: {
+                type: 'string',
+                nullable: true,
+                example:
+                  'A high school chemistry teacher diagnosed with inoperable lung cancer turns to manufacturing and selling methamphetamine.',
+              },
+              releaseDate: { type: 'string', nullable: true, example: '2008-01-20' },
               genres: {
                 type: 'array',
                 items: { $ref: '#/components/schemas/Genre' },
