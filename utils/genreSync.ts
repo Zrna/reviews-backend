@@ -38,11 +38,21 @@ export const syncGenresFromTMDB = async (): Promise<void> => {
       return;
     }
 
-    await Genre.bulkCreate(rows, {
+    const existing = await Genre.findAll({ attributes: ['tmdbId', 'mediaType', 'name'], raw: true });
+    const existingByKey = new Map(existing.map(g => [`${g.mediaType}:${g.tmdbId}`, g.name]));
+
+    const changed = rows.filter(r => existingByKey.get(`${r.mediaType}:${r.tmdbId}`) !== r.name);
+
+    if (changed.length === 0) {
+      logger.info('TMDB genres unchanged — skipping write');
+      return;
+    }
+
+    await Genre.bulkCreate(changed, {
       updateOnDuplicate: ['name', 'updatedAt'],
     });
 
-    logger.info(`Synced ${rows.length} genres from TMDB`);
+    logger.info(`Synced ${changed.length} genres from TMDB`);
   } catch (err) {
     logger.error(err, 'Failed to sync genres from TMDB');
   }
