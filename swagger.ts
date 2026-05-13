@@ -327,7 +327,7 @@ swaggerAutogenInstance(outputFile, endpointsFiles, doc).then(result => {
     });
 
     // Public routes that do not require bearer/cookie auth
-    const PUBLIC_PATHS = new Set(['/register', '/login', '/logout', '/status']);
+    const PUBLIC_PATHS = new Set(['/register', '/login', '/logout', '/auth/google', '/status']);
 
     const applyDefaultResponses = (path: string, method: string, endpoint: SwaggerEndpoint): void => {
       const isPublic = PUBLIC_PATHS.has(path);
@@ -473,7 +473,12 @@ swaggerAutogenInstance(outputFile, endpointsFiles, doc).then(result => {
 
         // Auto-assign tags based on path
         if (!endpoint.tags || endpoint.tags.length === 0) {
-          if (path.includes('/register') || path.includes('/login') || path.includes('/logout')) {
+          if (
+            path.includes('/register') ||
+            path.includes('/login') ||
+            path.includes('/logout') ||
+            path.startsWith('/auth/')
+          ) {
             endpoint.tags = ['Auth'];
           } else if (path.includes('/account')) {
             endpoint.tags = ['User'];

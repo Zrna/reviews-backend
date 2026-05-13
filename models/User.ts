@@ -1,13 +1,15 @@
 import { DataTypes, Model, ModelStatic, Sequelize } from 'sequelize';
 
-import { UserAttributes, UserCreationAttributes } from '../types/models';
+import { AuthProvider, UserAttributes, UserCreationAttributes } from '../types/models';
 
 class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
   declare id: number;
   declare email: string;
-  declare password: string;
-  declare firstName: string;
-  declare lastName: string;
+  declare password: string | null;
+  declare firstName: string | null;
+  declare lastName: string | null;
+  declare authProvider: AuthProvider;
+  declare providerSub: string | null;
   declare createdAt: Date;
   declare updatedAt: Date;
 
@@ -33,15 +35,24 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
         },
         password: {
           type: DataTypes.STRING,
-          allowNull: false,
+          allowNull: true,
         },
         firstName: {
           type: DataTypes.STRING,
-          allowNull: false,
+          allowNull: true,
         },
         lastName: {
           type: DataTypes.STRING,
+          allowNull: true,
+        },
+        authProvider: {
+          type: DataTypes.ENUM('local', 'google', 'apple'),
           allowNull: false,
+          defaultValue: 'local',
+        },
+        providerSub: {
+          type: DataTypes.STRING,
+          allowNull: true,
         },
         createdAt: DataTypes.DATE,
         updatedAt: DataTypes.DATE,

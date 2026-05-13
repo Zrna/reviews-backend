@@ -14,6 +14,7 @@ export const validateEnv = (): void => {
     'PORT',
     'TOKEN_SECRET',
     'TMDB_ACCESS_TOKEN',
+    'GOOGLE_OAUTH_CLIENT_IDS',
   ];
 
   const missingVars = requiredEnvVars.filter(varName => !(varName in process.env));

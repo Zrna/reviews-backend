@@ -46,6 +46,16 @@ const loginValidator = [
   handleValidationErrors,
 ];
 
+const googleAuthValidator = [
+  body('idToken')
+    .isString()
+    .withMessage("ID token can't be empty")
+    .bail()
+    .notEmpty()
+    .withMessage("ID token can't be empty"),
+  handleValidationErrors,
+];
+
 // User validators
 const updateAccountValidator = [
   body('firstName').trim().notEmpty().withMessage("First name can't be empty"),
@@ -96,6 +106,7 @@ const paginationValidator = [
 
 export {
   createReviewValidator,
+  googleAuthValidator,
   loginValidator,
   paginationValidator,
   registerValidator,

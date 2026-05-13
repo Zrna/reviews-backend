@@ -2,7 +2,7 @@ import { Router } from 'express';
 
 import * as AuthController from '../controllers/AuthController';
 import { loginLimiter, registerLimiter } from '../middlewares/rateLimiter';
-import { loginValidator, registerValidator } from '../middlewares/validators';
+import { googleAuthValidator, loginValidator, registerValidator } from '../middlewares/validators';
 
 const router = Router();
 
@@ -15,6 +15,11 @@ router.post('/register', registerLimiter, registerValidator, AuthController.auth
 // #swagger.summary = 'Login user'
 // #swagger.description = 'Authenticates user and returns JWT token. Rate limited to 10 attempts per 15 minutes per IP.'
 router.post('/login', loginLimiter, loginValidator, AuthController.auth_login);
+
+// #swagger.tags = ['Auth']
+// #swagger.summary = 'Sign in with Google'
+// #swagger.description = 'Verifies a Google ID token and issues a JWT. Auto-links to an existing local account when emails match and the Google email is verified.'
+router.post('/auth/google', loginLimiter, googleAuthValidator, AuthController.auth_google);
 
 // #swagger.tags = ['Auth']
 // #swagger.summary = 'Logout user'

@@ -1,16 +1,23 @@
 import { Optional } from 'sequelize';
 
+export type AuthProvider = 'local' | 'google' | 'apple';
+
 export interface UserAttributes {
   id: number;
   email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
+  password: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  authProvider: AuthProvider;
+  providerSub: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export type UserCreationAttributes = Optional<UserAttributes, 'id' | 'createdAt' | 'updatedAt'>;
+export type UserCreationAttributes = Optional<
+  UserAttributes,
+  'id' | 'password' | 'firstName' | 'lastName' | 'authProvider' | 'providerSub' | 'createdAt' | 'updatedAt'
+>;
 
 export type ReviewType = 'movie' | 'tv' | 'podcast' | 'youtube' | 'other';
 
