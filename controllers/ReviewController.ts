@@ -59,6 +59,14 @@ const get_latest_reviews = async (req: Request, res: Response, next: NextFunctio
           model: Media,
           as: 'media',
           attributes: ['img', 'type', 'overview', 'releaseDate'],
+          include: [
+            {
+              model: Genre,
+              as: 'genres',
+              attributes: ['id', 'name'],
+              through: { attributes: [] },
+            },
+          ],
         },
       ],
     });
